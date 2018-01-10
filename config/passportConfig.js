@@ -4,17 +4,18 @@ var TwitterStrategy = require("passport-twitter").Strategy;
 var db = require("../models");
 require("dotenv").config;
 
-// passport.serializeUser(function(user, callback) {
-//    callback(null, user.id);
-// });
-//
-// passport.deserializeUser(function(id, callback) {
-//    db.user.findById(id).then(function(user) {
-//       callback(null,user);
-//    }).catch(function(err){
-//       callback(err, null);
-//    });
-// });
+passport.serializeUser(function(user, callback) {
+   callback(null, user.id);
+});
+
+//-- gets the data object for the user
+passport.deserializeUser(function(id, callback) {
+   db.user.findById(id).then(function(user) {
+      callback(null,user);
+   }).catch(function(err){
+      callback(err, null);
+   });
+});
 
 // passport.use(new localStrategy({
 //       usernameField: "email",

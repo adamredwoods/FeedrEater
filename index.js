@@ -12,6 +12,10 @@ var app = express();
 
 app.engine("mustache", mustache());
 app.set("view engine", "mustache");
+app.set("view cache", false);
+
+app.set('views', __dirname + '/views');
+app.set('public', __dirname + '/public');
 app.use(express.static(__dirname+"/public"));
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -34,9 +38,9 @@ app.use(function(req,res, next) {
 
 app.use("/auth", require("./controllers/auth"));
 
-app.get("/", function(req,res) {
+app.get("/", isLoggedIn, function(req,res) {
    console.log(122);
-   res.send("made it here");
+   res.send("Homepage");
 });
 
 app.listen(process.env.PORT || 3000);
