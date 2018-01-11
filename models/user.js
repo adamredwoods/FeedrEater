@@ -9,13 +9,12 @@ module.exports = (sequelize, DataTypes) => {
     profilePic: DataTypes.TEXT,
     twitterId: DataTypes.STRING,
     twitterToken: DataTypes.STRING
-  }, {
-    classMethods: {
-      associate: function(models) {
-        models.user.belongsToMany(models.rsslist, {through: models.rssuser, foreignKey: "userId"}),
-        models.user.hasMany(model.notes, {foreignKey: "userId"})
-      }
-    }
-  });
+});
+
+   user.associate= function(models) {
+     models.user.belongsToMany(models.rsslist, {through: models.rssuser, foreignKey: "userId"}),
+     models.user.hasMany(models.notes, {foreignKey: "userId"})
+   };
+
   return user;
 };

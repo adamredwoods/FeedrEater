@@ -3,7 +3,8 @@ const passport = require("../config/passportConfig");
 const db = require('../models');
 const router = express.Router();
 const isLoggedIn = require("../middleware/isLoggedIn");
-const request = require("request");
+const rss = require("../middleware/rss");
+const xmlParser = require("../middleware/xmlParser");
 
 router.get("/", isLoggedIn, function(req,res) {
    var rssList = [];
@@ -29,25 +30,70 @@ router.post("/add", isLoggedIn, function(req,res) {
    if (req.body.rsslink) {
       console.log("rss link ",req.body.rsslink);
       db.rsslist.findAll({
-         where: { id: req.user.id },
-         include: [db.rsslist]
+         where: { url: req.body.rsslink },
+         include: [{model:db.user, where: {id: req.user.id}}]
       }).then( function(links){
-         res.send("found links, need to search");
+         //console.log(links[0].users);
+         //--already added?
+         if(links.length>0) {
+            res.end();
+         } else {
+            //--not added
+            console.log("not found, ok to add..........");
+            //-- get rss data 
+            rss.get(req.body.rsslink, function(err, data) {
+               console.log(xmlParser.getTitle(data));
+               db.rsslist.create({
+                  url: req.body.rsslink,
+                  title: xmlParser.getTitle(data),
+
+               }).then(function(rssData) {
+                  //-- create join between tables
+                  db.rssuser.create({
+                     userId: req.user.id,
+                     rssId: rssData.id
+                  }).then( function(d) {
+                     res.send("add success");
+                  }).catch( function(err) {
+                     res.send("db add error "+err+"     \n "+err.msg);
+                  });
+
+               }).catch(function(err){
+                  console.log(err);
+                  res.send("error");
+               })
+               console.log(err);
+            });
+         }
       }).catch( function(err){
-         //--not found, ok to add
-
+         //
+         console.log("db search error..........");
          //--grab XML data
+         //rss.get(req.body.rsslink, function(err, data) {
+            //console.log(xmlParser.getTitle(data));
+            // db.rsslist.create({
+            //    url: req.body.rsslink,
+            //    title: xmlParser.getTitle(data),
+            //
+            // }).then(function(rssData) {
+            //    //-- create join between tables
+            //    db.rssuser.create({
+            //       userId: req.user.id,
+            //       rssId: rssData.id
+            //    }).then( function(d) {
+            //       res.send("add success");
+            //    }).catch( function(err) {
+            //       res.send("db add error "+err+"     \n "+err.msg);
+            //    });
+            //
+            // }).catch(function(err){
+            //    console.log(err);
+            //    res.send("error");
+            // })
+            //console.log(err);
 
-         db.rsslist.create({
-            url: req.body.rsslink,
-            title: xmlParser.getTitle()
-         }).then(function(link) {
+         //});
 
-         }).catch(function(err){
-            console.log(err);
-         })
-         console.log(err);
-         res.send("add");
       });
    } else {
       res.end();
