@@ -1,8 +1,47 @@
 {{>header}}
 <div class="row">
-   <div class="column column-50 column-offset-25">
+   <div class="column column-10"></div>
+   <div class="column padding-50">
       <h2>User Index</h2>
+      {{user}}
+      {{^rssList}}
+      <p>
+         No RSS Feeds.
+      </p>
+      {{/rssList}}
+   </div>
+
+   <div class=" menu column column-25">
+      <form method="post" action="/user/add">
+         <div class="card margin-10 padding-10">
+            <h4>Add RSS</h4>
+         </div>
+         <div class="card margin-10 padding-10">
+            <h4>Add URL</h4>
+            <input type="text" name="rsslinktxt">
+            <button type="submit">Add</button>
+         </div>
+
+         <div class="card margin-10 padding-10">
+            <h4>Popular RSS Feeds</h4>
+            <div>
+               The Guardian<br>
+               <button type="submit" name="rsslink" value="https://www.theguardian.com/world/rss">Add</button>
+            </div>
+            <div>
+               NPR<br>
+               <button type="submit" name="rsslink" value="https://www.npr.org/rss/rss.php?id=1001">Add</button>
+            </div>
+            <div>
+               Hacker News<br>
+               <button type="submit" name="rsslink" value="https://news.ycombinator.com/rss">Add</button>
+            </div>
+            <div>
+               BBC<br>
+               <button type="submit" name="rsslink" value="http://feeds.bbci.co.uk/news/world/rss.xml">Add</button>
+            </div>
+         </div>
+      </form>
    </div>
 </div>
-
 {{>footer}}

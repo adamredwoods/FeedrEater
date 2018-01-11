@@ -37,13 +37,10 @@ app.use(function(req,res, next) {
 });
 
 app.use("/auth", require("./controllers/auth"));
-
-app.get("/user", isLoggedIn, function(req,res) {
-   res.render("user/index");
-});
+app.use("/user", require("./controllers/user"));
 
 app.get("/", function(req,res) {
-   res.send("Homepage");
+   res.render("home");
 });
 
 app.listen(process.env.PORT || 3000);

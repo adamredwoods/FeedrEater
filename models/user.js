@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     classMethods: {
       associate: function(models) {
-        models.user.belongsToMany(models.rss, {through: models.rssuser, foreignKey: "userId"}),
+        models.user.belongsToMany(models.rsslist, {through: models.rssuser, foreignKey: "userId"}),
         models.user.hasMany(model.notes, {foreignKey: "userId"})
       }
     }

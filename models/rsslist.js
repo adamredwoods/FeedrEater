@@ -7,6 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     classMethods: {
       associate: function(models) {
         // associations can be defined here
+        models.rsslist.belongsToMany(models.user, {through:models.rssuser, foreignKey:"rssId"}),
+        models.rsslist.belongsToMany(models.category, {through: models.rsscategory, foreignKey: "rssId"})
       }
     }
   });

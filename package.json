@@ -30,6 +30,7 @@
     "passport-twitter": "^1.0.4",
     "pg": "^6.4.1",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^4.30.1"
+    "sequelize": "^4.30.1",
+    "xmldoc": "^1.1.0"
   }
 }

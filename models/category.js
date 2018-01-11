@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     classMethods: {
       associate: function(models) {
         // associations can be defined here
+        models.category.belongsToMany(models.rsscategy, {through: models.rsslist, foreignKey: "categoryId"})
       }
     }
   });
