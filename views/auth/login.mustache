@@ -1,4 +1,20 @@
 {{>header}}
-<h2>Twitter Login</h2>
+<div class="row">
+   <div class="column column-50 column-offset-25 text-center">
+      <a href="/auth/twitter"><img class="margin-50" src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png"</a>
+   </div>
+</div>
+<form method="post" action="/auth/twitter">
+   <div class="row ">
+      <div class="card column column-50 column-offset-25">
+         <h2>Login</h2>
+         <label for="name">Username</label>
+         <input type="text" id="name">
+         <label for="pwd">Password</label>
+         <input type="password" id="pwd">
+         <button type="submit">Login</button>
 
+      </div>
+   </div>
+</form>
 {{>footer}}

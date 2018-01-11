@@ -6,11 +6,14 @@ module.exports = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     profileText: DataTypes.TEXT,
-    profilePic: DataTypes.TEXT
+    profilePic: DataTypes.TEXT,
+    twitterId: DataTypes.STRING,
+    twitterToken: DataTypes.STRING
   }, {
     classMethods: {
       associate: function(models) {
-        // associations can be defined here
+        models.user.belongsToMany(models.rss, {through: models.rssuser, foreignKey: "userId"}),
+        models.user.hasMany(model.notes, {foreignKey: "userId"})
       }
     }
   });

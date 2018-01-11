@@ -41,11 +41,53 @@ passport.use(new TwitterStrategy({
     callbackURL: process.env.BASE_URL+"/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, callback) {
-    db.user.findOrCreate({ twitterId: profile.id }, function (err, user) {
-      console.log("TWITTER OK ",profile.id);
-      return callback(err, user);
+    process.nextTick( function() {
+      db.user.findOne({
+            where:{ twitterId: profile.id }
+         }).then(function (user) {
+            //console.log("TWITTER OK ",profile.id, " err",err," user",user);
+            var photo, email;
+
+            if(user) {
+               //--returning user
+               console.log(111);
+               return callback(null, user);
+            } else {
+
+               if(profile.photos) {
+                  photo = profile.photos[0].value;
+               }
+               if(profile.emails) {
+                  email = profile.emails[0].value;
+               }
+   console.log(222);
+               db.user.findOrCreate({
+                  where: {twitterId: profile.id},
+                  defaults: {
+                     twitterId: profile.id,
+                     email: email,
+                     twitterToken: token,
+                     name: profile.username,
+                     profilePic: photo
+                  }
+               }).spread(
+                  function(user, wasCreated) {
+                     if(wasCreated) {
+                        //-- new user
+   console.log(333);
+                        return callback(null, user);
+                     } else {
+                        //-- something wrong on our end
+   console.log("err",err);
+                        return callback(err, user);
+                     }
+                  }
+               ).catch(callback)
+console.log(999);
+            }
+         });
     });
-  }
+   }
 ));
 
 

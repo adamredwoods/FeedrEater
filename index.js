@@ -38,8 +38,11 @@ app.use(function(req,res, next) {
 
 app.use("/auth", require("./controllers/auth"));
 
-app.get("/", isLoggedIn, function(req,res) {
-   console.log(122);
+app.get("/user", isLoggedIn, function(req,res) {
+   res.render("user/index");
+});
+
+app.get("/", function(req,res) {
    res.send("Homepage");
 });
 

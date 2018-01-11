@@ -9,14 +9,14 @@ router.get("/login", function(req,res) {
 });
 
 router.post("/login", passport.authenticate("local", {
-   successRedirect: "/profile",
+   successRedirect: "/user/index",
    successFlash: "Login Successful",
    failureRedirect: "/auth/login",
    failureFlash: "Invalid username or password."
 }));
 
 router.get("/signup", function(req,res){
-   res.render("auth/signup");
+   res.send ("auth signup");
 });
 
 router.post("/signup", function(req,res, next) {
@@ -47,12 +47,10 @@ router.post("/signup", function(req,res, next) {
    // })
 });
 
-router.get("/twitter", passport.authenticate("twitter", {
-   scope: ["public_profile", "email"]
-}));
+router.get("/twitter", passport.authenticate("twitter"));
 
-router.get("/callback/twitter", passport.authenticate("twitter", {
-   successRedirect: "/profile",
+router.get("/twitter/callback", passport.authenticate("twitter", {
+   successRedirect: "/user",
    successFlash: "You successfully logged in via Twitter",
    failureRedirect: "/auth/login",
    failureFlash: "You tried but Twitter failure"
