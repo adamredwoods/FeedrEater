@@ -5,19 +5,54 @@ const router = express.Router();
 const isLoggedIn = require("../middleware/isLoggedIn");
 const rss = require("../middleware/rss");
 const xmlParser = require("../middleware/xmlParser");
+const mustache = require("mustache");
 
 router.get("/", isLoggedIn, function(req,res) {
-   var rssList = [];
-   db.rssuser.findAll({
-      where: {userId: req.user.id},
+
+   var isRendering =0;
+
+   db.user.findOne({
+      where: {id: req.user.id},
       include: [db.rsslist]
    }).then( function(list) {
-      console.log("list..........",list);
-      res.render("user/index", {rssList:list, user:req.user.id});
-   }).catch( function(err) {
+      console.log("list..........",list.rsslists.length);
+      if (list.length===0) {
+         list = [];
+      }
 
+      //-- get rss feed
+      var feed =[];
+      var lastone = list.rsslists.length-1;
+
+      for (let i=0; i<list.rsslists.length; i++) {
+         rss.get(list.rsslists[i].url, function(err,xml) {
+            if(!err) {
+               var rssdata = xmlParser.getItemList(xml);
+
+               for(let j=0; j<rssdata.length; j++) {
+                  feed.push(rssdata[i]);
+               }
+               //-- use sockets
+               io.sockets.emit("update", rssdata);
+
+            } else {
+               console.log("error ",err);
+               // res.req("error","ERROR: "+err);
+               //res.render("user/index",{rssList:[], user:0});
+            }
+         });
+      }
+
+      //res.render("user/index", {rssList:feed, user:req.user.id});
+
+      if (lastone=== -1) {
+         //res.render("user/index", {rssList:feed, user:req.user.name});
+      }
+
+   }).catch( function(err) {
+      req.flash("error",err);
+      res.render("user/index",{rssList:[], user:req.user.name});
    });
-   res.render("user/index", {rssList:rssList, user:req.user.id});
 });
 
 router.get("/logout", function(req,res) {
@@ -28,7 +63,8 @@ router.get("/logout", function(req,res) {
 
 router.post("/add", isLoggedIn, function(req,res) {
    if (req.body.rsslink) {
-      console.log("rss link ",req.body.rsslink);
+
+      console.log("add rss link ",req.body.rsslink);
       db.rsslist.findAll({
          where: { url: req.body.rsslink },
          include: [{model:db.user, where: {id: req.user.id}}]
@@ -40,27 +76,30 @@ router.post("/add", isLoggedIn, function(req,res) {
          } else {
             //--not added
             console.log("not found, ok to add..........");
-            //-- get rss data 
+            //-- get rss data
             rss.get(req.body.rsslink, function(err, data) {
-               console.log(xmlParser.getTitle(data));
+               //console.log(xmlParser.getTitle(data));
                db.rsslist.create({
                   url: req.body.rsslink,
-                  title: xmlParser.getTitle(data),
-
+                  title: xmlParser.getTitle(data)
                }).then(function(rssData) {
                   //-- create join between tables
                   db.rssuser.create({
                      userId: req.user.id,
                      rssId: rssData.id
                   }).then( function(d) {
-                     res.send("add success");
+                     //-- add rsslink success
+                     req.flash("success","add success");
+                     res.render("/user/index");
                   }).catch( function(err) {
-                     res.send("db add error "+err+"     \n "+err.msg);
+                     req.flash("error","db add error "+err+"     \n "+err.msg);
+                     res.render("/user/index");
                   });
 
                }).catch(function(err){
                   console.log(err);
-                  res.send("error");
+                  req.flash("error","db error "+err);
+                  res.render("/user/index");
                })
                console.log(err);
             });

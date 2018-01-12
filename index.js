@@ -8,7 +8,10 @@ const session = require("express-session");
 
 const mustache = require("mustache-express");
 const isLoggedIn = require("./middleware/isLoggedIn");
+const socket = require("socket.io");
+
 var app = express();
+
 
 app.engine("mustache", mustache());
 app.set("view engine", "mustache");
@@ -43,4 +46,5 @@ app.get("/", function(req,res) {
    res.render("home");
 });
 
-app.listen(process.env.PORT || 3000);
+server = app.listen(process.env.PORT || 3000);
+global.io = socket(server);

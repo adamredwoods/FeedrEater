@@ -3,7 +3,7 @@ const request = require("request");
 //-- callback(error, xml)
 exports.get = function (url,callback) {
    request(url, function (error, response, body) {
-      if (response.statusCode ===200) {
+      if (response && response.statusCode ===200) {
          callback(null, body);
       } else {
          callback(error, null);
