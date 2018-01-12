@@ -3,28 +3,68 @@ var session_name="feedcache";
 var feed = document.getElementsByClassName("feed")[0];
 var totalfeed=[];
 
-function appendFeed(data, cache) {
-   for(let i=0; i<data.length; i++) {
+//--could appendFeed to totalfeed, then call update feed where updateFeed will sort and display
+
+function update() {
+   if(!feed) return;
+
+   totalfeed = totalfeed.sort(function(a,b) {
+      if (a.date>b.date) return -1;
+      if (a.date<b.date) return 1;
+      return 0;
+   });
+
+   for(let i=0; i<totalfeed.length; i++) {
       var pp = document.createElement("p");
       var img = document.createElement("img");
-      img.setAttribute("src",data[i].imgurl);
+      img.setAttribute("src",totalfeed[i].imgurl);
       img.setAttribute("width","80px");
+
+      if(totalfeed[i].imgurl.length<3) {
+         img = document.createElement("h2");
+         img.setAttribute("style","display:inline; margin-right:20px;");
+         img.textContent = totalfeed[i].imgurl[0];
+      }
+
       var a = document.createElement("a");
-      a.textContent = data[i].title;
-      a.setAttribute("href",data[i].url);
+      a.textContent = totalfeed[i].title;
+      a.setAttribute("href",totalfeed[i].url);
       a.setAttribute("target","_blank");
       var date = document.createElement("div");
-      date.textContent = data[i].date;
+      date.textContent = totalfeed[i].date;
       pp.appendChild(img);
       pp.appendChild(a);
       pp.appendChild(date);
       feed.appendChild(pp);
+   }
+}
+
+function appendFeed(data, cache) {
+   //if(!feed) return;
+
+   for(let i=0; i<data.length; i++) {
+      // var pp = document.createElement("p");
+      // var img = document.createElement("img");
+      // img.setAttribute("src",data[i].imgurl);
+      // img.setAttribute("width","80px");
+      // var a = document.createElement("a");
+      // a.textContent = data[i].title;
+      // a.setAttribute("href",data[i].url);
+      // a.setAttribute("target","_blank");
+      // var date = document.createElement("div");
+      // date.textContent = data[i].date;
+      // pp.appendChild(img);
+      // pp.appendChild(a);
+      // pp.appendChild(date);
+      // feed.appendChild(pp);
 
       //--implement a cache for current feed
       if(cache) {
          totalfeed.push(data[i]);
       }
    }
+
+   update();
 }
 
 function setup() {
@@ -46,6 +86,7 @@ function setup() {
 
    socket.on("clearcache", function(){
       sessionStorage.setItem(session_name, "");
+      totalfeed = [];
    });
 }
 

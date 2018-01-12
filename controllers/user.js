@@ -28,6 +28,7 @@ router.get("/", isLoggedIn, function(req,res) {
       io.sockets.emit("clearcache");
 
       for (let i=0; i<list.rsslists.length; i++) {
+         //--this rss.get could use an LRU cache
          rss.get(list.rsslists[i].url, function(err,xml) {
             if(!err) {
                var rssdata = xmlParser.getItemList(xml);
