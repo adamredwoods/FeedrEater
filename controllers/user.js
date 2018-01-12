@@ -15,14 +15,14 @@ router.get("/", isLoggedIn, function(req,res) {
       where: {id: req.user.id},
       include: [db.rsslist]
    }).then( function(list) {
-      console.log("list..........",list.rsslists.length);
+      //console.log("list..........",list.rsslists.length);
       if (list.length===0) {
          list = [];
       }
 
       //-- get rss feed
       var feed =[];
-      var lastone = list.rsslists.length-1;
+      // var lastone = list.rsslists.length-1;
 
       //--new lists, clear client side cache
       io.sockets.emit("clearcache");
@@ -76,7 +76,7 @@ router.post("/add", isLoggedIn, function(req,res) {
    //-- check which input is coming in
    if(!req.body.rsslink) {
       //-- check input link for valid rss
-      console.log(req.body.rsslinktxt);
+      //console.log(req.body.rsslinktxt);
       rss.checkUrl(req.body.rsslinktxt, function(err, check){
          if (check) {
             addLink(req,res, req.body.rsslinktxt);
@@ -173,5 +173,26 @@ function addLink(req,res, link) {
       res.end();
    }
 };
+
+router.get("/rsslist", isLoggedIn, function(req,res) {
+
+   db.user.findAll({
+      where: { id: req.user.id},
+      include: [db.rsslist]
+   }).then( function(user){
+      var index=0;
+      res.render("user/rsslist", {
+         rsslist:user[0].rsslists,
+         user:req.user.name,
+         index: function() {
+           return ++index;
+         }
+      });
+   }).catch( function(err) {
+      req.flash("error","DB error");
+      res.render("user/index", {user:req.user.name});
+   });
+
+});
 
 module.exports = router;

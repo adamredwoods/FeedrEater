@@ -15,7 +15,7 @@
       {{/rssList}}
    </div>
 
-   <div class=" menu column column-25">
+   {{>menu}}
       <form method="post" action="/user/add">
          <div class="card margin-10 padding-10">
             <h4>Add RSS</h4>
@@ -45,7 +45,13 @@
                <button type="submit" name="rsslink" value="http://feeds.bbci.co.uk/news/world/rss.xml">Add</button>
             </div>
          </div>
+
+         <div class="card margin-10 padding-10">
+            <a href="/user/rsslist" class="button">
+               Edit Feed List
+            </a>
+         </div>
       </form>
-   </div>
+   {{>endmenu}}
 </div>
 {{>footer}}

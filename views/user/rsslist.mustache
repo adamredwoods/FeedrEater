@@ -1,0 +1,23 @@
+{{>header}}
+<div class="row">
+   <div class="column column-10"></div>
+   <div class="column padding-50">
+      <ol>
+         {{#rsslist}}
+            <div class="row">
+               <div class="rsslist-item column column-30">{{index}} - {{title}}</div>
+               <div class="column text-center">
+                  <button name="delete" class="button-small">Delete</button>
+               </div>
+            </div>
+            <hr>
+         {{/rsslist}}
+      </ol>
+   </div>
+   {{>menu}}
+      <div class="card margin-10 padding-10 text-center">
+         <a href="/user" class="button">View feed</a>
+      </div>
+   {{>endmenu}}
+</div>
+{{>footer}}

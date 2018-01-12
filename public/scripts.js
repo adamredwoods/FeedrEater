@@ -43,20 +43,6 @@ function appendFeed(data, cache) {
    //if(!feed) return;
 
    for(let i=0; i<data.length; i++) {
-      // var pp = document.createElement("p");
-      // var img = document.createElement("img");
-      // img.setAttribute("src",data[i].imgurl);
-      // img.setAttribute("width","80px");
-      // var a = document.createElement("a");
-      // a.textContent = data[i].title;
-      // a.setAttribute("href",data[i].url);
-      // a.setAttribute("target","_blank");
-      // var date = document.createElement("div");
-      // date.textContent = data[i].date;
-      // pp.appendChild(img);
-      // pp.appendChild(a);
-      // pp.appendChild(date);
-      // feed.appendChild(pp);
 
       //--implement a cache for current feed
       if(cache) {
