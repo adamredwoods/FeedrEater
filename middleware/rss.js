@@ -10,3 +10,19 @@ exports.get = function (url,callback) {
       }
    });
 }
+
+exports.checkUrl = function(url, callback) {
+   request(url, function (error, response, body) {
+      if (response && response.statusCode ===200) {
+         let ss = body.slice(0,3);
+         console.log(ss);
+         if (ss==="<rss") {
+            callback(null, body);
+         } else {
+            callback(error, null);
+         }
+      } else {
+         callback(error, null);
+      }
+   });
+}

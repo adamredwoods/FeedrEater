@@ -23,6 +23,8 @@ exports.getItemList = function(str) {
 
       if(list[i].childNamed("media:content")) {
          imgurl=list[i].childNamed("media:content").attr.url;
+      } else if(node.descendantWithPath("channel.image.url")) {
+         imgurl=node.descendantWithPath("channel.image.url").val;
       }
 
       returnList.push( {

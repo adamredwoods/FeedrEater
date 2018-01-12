@@ -24,6 +24,9 @@ router.get("/", isLoggedIn, function(req,res) {
       var feed =[];
       var lastone = list.rsslists.length-1;
 
+      //--new lists, clear client side cache
+      io.sockets.emit("clearcache");
+
       for (let i=0; i<list.rsslists.length; i++) {
          rss.get(list.rsslists[i].url, function(err,xml) {
             if(!err) {
@@ -32,7 +35,7 @@ router.get("/", isLoggedIn, function(req,res) {
                for(let j=0; j<rssdata.length; j++) {
                   feed.push(rssdata[i]);
                }
-               //-- use sockets
+               //-- use sockets, global io
                io.sockets.emit("update", rssdata);
 
             } else {
@@ -43,7 +46,7 @@ router.get("/", isLoggedIn, function(req,res) {
          });
       }
 
-      //res.render("user/index", {rssList:feed, user:req.user.id});
+      res.render("user/index", {rssList:list.rsslists.length, user:req.user.name});
 
       if (lastone=== -1) {
          //res.render("user/index", {rssList:feed, user:req.user.name});
@@ -51,36 +54,67 @@ router.get("/", isLoggedIn, function(req,res) {
 
    }).catch( function(err) {
       req.flash("error",err);
-      res.render("user/index",{rssList:[], user:req.user.name});
+      io.sockets.emit("savecache"); //--soft reload
+      res.render("user/index", {rssList:1, user:req.user.name});
+
    });
 });
 
 router.get("/logout", function(req,res) {
    req.logout();
    req.flash("success","logged out");
-   res.render("user");
+   res.render("home");
+});
+
+router.get("/add", isLoggedIn, function(req,res) {
+   res.redirect("/user");
 });
 
 router.post("/add", isLoggedIn, function(req,res) {
-   if (req.body.rsslink) {
 
-      console.log("add rss link ",req.body.rsslink);
+   //-- check which input is coming in
+   if(!req.body.rsslink) {
+      //-- check input link for valid rss
+      console.log(req.body.rsslinktxt);
+      rss.checkUrl(req.body.rsslinktxt, function(err, check){
+         if (check) {
+            addLink(req,res, req.body.rsslinktxt);
+         } else {
+            console.log("Not valid url.");
+            req.flash("Not a valid url.");
+
+            io.sockets.emit("savecache"); //--soft reload
+            res.render("user/index", {rssList:1, user:req.user.name});
+
+         }
+      });
+   } else {
+      addLink(req,res, req.body.rsslink);
+   }
+});
+
+function addLink(req,res, link) {
+   if (link) {
+
+      console.log("add rss link ",link);
+
       db.rsslist.findAll({
-         where: { url: req.body.rsslink },
+         where: { url: link },
          include: [{model:db.user, where: {id: req.user.id}}]
       }).then( function(links){
-         //console.log(links[0].users);
+
          //--already added?
          if(links.length>0) {
             res.end();
          } else {
+
             //--not added
             console.log("not found, ok to add..........");
             //-- get rss data
-            rss.get(req.body.rsslink, function(err, data) {
+            rss.get(link, function(err, data) {
                //console.log(xmlParser.getTitle(data));
                db.rsslist.create({
-                  url: req.body.rsslink,
+                  url: link,
                   title: xmlParser.getTitle(data)
                }).then(function(rssData) {
                   //-- create join between tables
@@ -90,16 +124,16 @@ router.post("/add", isLoggedIn, function(req,res) {
                   }).then( function(d) {
                      //-- add rsslink success
                      req.flash("success","add success");
-                     res.render("/user/index");
+                     res.render("user/index");
                   }).catch( function(err) {
                      req.flash("error","db add error "+err+"     \n "+err.msg);
-                     res.render("/user/index");
+                     res.render("user/index");
                   });
 
                }).catch(function(err){
                   console.log(err);
                   req.flash("error","db error "+err);
-                  res.render("/user/index");
+                  res.render("user/index");
                })
                console.log(err);
             });
@@ -137,6 +171,6 @@ router.post("/add", isLoggedIn, function(req,res) {
    } else {
       res.end();
    }
-});
+};
 
 module.exports = router;
