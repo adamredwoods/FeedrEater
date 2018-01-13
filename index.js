@@ -12,7 +12,6 @@ const socket = require("socket.io");
 
 var app = express();
 
-
 app.engine("mustache", mustache());
 app.set("view engine", "mustache");
 app.set("view cache", false);
@@ -30,7 +29,7 @@ app.use(session({
    saveUninitialized: true
 }));
 
-app.use(flash());
+app.use(flash()); //--only works on redirects
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(function(req,res, next) {

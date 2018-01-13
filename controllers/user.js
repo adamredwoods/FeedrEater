@@ -21,50 +21,46 @@ router.get("/", isLoggedIn, function(req,res) {
       }
 
       //-- get rss feed
-      var feed =[];
-      // var lastone = list.rsslists.length-1;
-
-      //--new lists, clear client side cache
-      io.sockets.emit("clearcache");
-
-      for (let i=0; i<list.rsslists.length; i++) {
-         //--this rss.get could use an LRU cache
-         rss.get(list.rsslists[i].url, function(err,xml) {
-            if(!err) {
-               var rssdata = xmlParser.getItemList(xml);
-
-               for(let j=0; j<rssdata.length; j++) {
-                  feed.push(rssdata[i]);
-               }
-               //-- use sockets, global io
-               io.sockets.emit("update", rssdata);
-
-            } else {
-               console.log("error ",err);
-               // res.req("error","ERROR: "+err);
-               //res.render("user/index",{rssList:[], user:0});
-            }
-         });
-      }
-
       res.render("user/index", {rssList:list.rsslists.length, user:req.user.name});
 
-      if (lastone=== -1) {
-         //res.render("user/index", {rssList:feed, user:req.user.name});
-      }
+
+         //--new lists, clear client side cache
+         io.sockets.emit("clearcache");
+
+         for (let i=0; i<list.rsslists.length; i++) {
+            //--this rss.get could use an LRU cache
+            process.nextTick( ()=> {
+               rss.get(list.rsslists[i].url, function(err,xml) {
+                  if(!err) {
+                     var rssdata = xmlParser.getItemList(xml);
+
+                     //-- use sockets, global io
+                     //--spacing out our emits, so client does not miss any
+                     var int = setInterval(()=>{
+                        io.sockets.emit("update", rssdata);
+                        clearInterval(int);
+                     }, 50*i);
+
+                  } else {
+                     console.log("error ",err);
+                     // res.req("error","ERROR: "+err);
+                     //res.render("user/index",{rssList:[], user:0});
+                  }
+               });
+            });
+         }
 
    }).catch( function(err) {
-      req.flash("error",err);
+      var alerts = {"error": err};
       io.sockets.emit("savecache"); //--soft reload
-      res.render("user/index", {rssList:1, user:req.user.name});
-
+      res.render("user/index", {rssList:1, user:req.user.name, alerts});
    });
 });
 
-router.get("/logout", function(req,res) {
+router.get("/logout", isLoggedIn, function(req,res) {
    req.logout();
-   req.flash("success","logged out");
-   res.render("home");
+   var alerts = {"success": "User is logged out"};
+   res.render("home", {alerts});
 });
 
 router.get("/add", isLoggedIn, function(req,res) {
@@ -82,10 +78,10 @@ router.post("/add", isLoggedIn, function(req,res) {
             addLink(req,res, req.body.rsslinktxt);
          } else {
             console.log("Not valid url.");
-            req.flash("Not a valid url.");
+            var alerts = {"error": "Not a valid URL"};
 
             io.sockets.emit("savecache"); //--soft reload
-            res.render("user/index", {rssList:1, user:req.user.name});
+            res.render("user/index", {rssList:1, user:req.user.name, alerts});
 
          }
       });
@@ -124,17 +120,17 @@ function addLink(req,res, link) {
                      rssId: rssData.id
                   }).then( function(d) {
                      //-- add rsslink success
-                     req.flash("success","add success");
-                     res.render("user/index");
+                     var alerts = {"success": "New RSS added to list"};
+                     res.render("user/index", {alerts});
                   }).catch( function(err) {
-                     req.flash("error","db add error "+err+"     \n "+err.msg);
-                     res.render("user/index");
+                     var alerts = {"error": "DB add error "+err};
+                     res.render("user/index", {alerts});
                   });
 
                }).catch(function(err){
                   console.log(err);
-                  req.flash("error","db error "+err);
-                  res.render("user/index");
+                  var alerts = {"error": "DB error "+err};
+                  res.render("user/index", {alerts});
                })
                console.log(err);
             });
@@ -174,25 +170,6 @@ function addLink(req,res, link) {
    }
 };
 
-router.get("/rsslist", isLoggedIn, function(req,res) {
 
-   db.user.findAll({
-      where: { id: req.user.id},
-      include: [db.rsslist]
-   }).then( function(user){
-      var index=0;
-      res.render("user/rsslist", {
-         rsslist:user[0].rsslists,
-         user:req.user.name,
-         index: function() {
-           return ++index;
-         }
-      });
-   }).catch( function(err) {
-      req.flash("error","DB error");
-      res.render("user/index", {user:req.user.name});
-   });
-
-});
 
 module.exports = router;

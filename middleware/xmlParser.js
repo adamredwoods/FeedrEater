@@ -37,11 +37,14 @@ exports.getItemList = function(str) {
          imgurl=title.slice(0,1);
       }
 
+      var source = node.descendantWithPath("channel.link").val.split("/")[2]; 
+
       returnList.push( {
          title: list[i].childNamed("title").val,
          url: list[i].childNamed("link").val,
          date: convertDate(list[i].childNamed("pubDate").val),
-         imgurl: imgurl
+         imgurl: imgurl,
+         source: source
       });
    }
    //--send to obj and add to list and return

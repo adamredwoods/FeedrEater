@@ -43,7 +43,27 @@ body {
    }
 }
 
-.rsslist-item {
-   font-size: 1.4em;
+.rsslist-image {
+   width: 15%;
+   /*float: left;*/
    display: inline-block;
+   margin-right: 30px;
+}
+.rsslist-title {
+   font-size: 1.5em;
+   display: inline-block;
+   overflow: hidden;
+   /*white-space: nowrap;*/
+}
+.rsslist-titleblock {
+   display:inline-block;
+   width:80%;
+}
+.source-tag {
+   background-color: #ddd;
+   color: #85a;
+   padding: 1px 6px 1px 6px;
+   margin-right: 20px;
+   display: inline-block;
+   font-size: 0.8em;
 }
