@@ -1,5 +1,7 @@
+const REQUEST_TIME = 100;
+
 //--get data from server
-var interval = setInterval(getData,1000);
+var interval = setInterval(getData,REQUEST_TIME);
 
 
 var feed = document.getElementsByClassName("feed")[0];
@@ -65,6 +67,7 @@ function update() {
 
 function appendFeed(data, cache) {
    //if(!feed) return;
+   console.log(data);
    for(let i=0; i<data.length; i++) {
 
       //--implement a cache for current feed
@@ -78,6 +81,12 @@ function appendFeed(data, cache) {
 
 function getData() {
    ajax().get("/user/feeddata").then( function(res, xhr) {
-      appendFeed(JSON.parse(xhr.response)), true);
+      let obj = JSON.parse(xhr.response);
+      if (obj.total>0) {
+         console.log(obj);
+         if(obj.data) appendFeed(obj.data, true);
+      } else {
+         clearInterval(interval);
+      }
    })
 }

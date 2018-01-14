@@ -3,7 +3,8 @@ const xmlParser = require("../middleware/xmlParser");
 
 //-- async get rss xml data
 //-- callback(error, xml)
-exports.getRss = function (url,callback) {
+exports.getRss = function (url, callback) {
+
    request(url, function (error, response, body) {
       if (response && response.statusCode ===200) {
          callback(null, body);
