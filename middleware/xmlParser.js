@@ -18,7 +18,7 @@ exports.getTitle = function(str) {
 
 }
 
-exports.getItemList = function(str) {
+exports.getItemList = function(str, sourceRank) {
    //-- grab title, url, date, sourceUrl
    var node = new xmldoc.XmlDocument(str);
    var title = node.descendantWithPath("channel.title").val;
@@ -45,7 +45,8 @@ exports.getItemList = function(str) {
          url: list[i].childNamed("link").val,
          date: convertDate(list[i].childNamed("pubDate").val),
          imgurl: imgurl,
-         source: source
+         source: source,
+         sourceRank: sourceRank
       });
    }
    //--send to obj and add to list and return

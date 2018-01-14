@@ -23,6 +23,7 @@ router.get("/", isLoggedIn, function(req,res) {
 
          //--new lists, clear client side cache
          //io.sockets.emit("clearcache");
+
          req.session.rssTotal = list.rsslists.length;
          req.session.rssdata = [];
 
@@ -31,22 +32,17 @@ router.get("/", isLoggedIn, function(req,res) {
             process.nextTick( ()=> {
                rss.getRss(list.rsslists[i].url, function(err, xml) {
                   if(!err) {
-                     var rssdata = xmlParser.getItemList(xml);
+                     //-- passing user defined rank into object
+                     var sourceRank = list.rsslists[i].rssuser.userRank;
+                     if (!sourceRank) sourceRank = i;
 
-                     //-- use sockets, global io
-                     //--spacing out our emits, so client does not miss any
-                     // var int = setInterval(()=>{
-                     //    io.sockets.emit("update", rssdata);
-                     //    clearInterval(int);
-                     // }, 50*i);
+                     var rssdata = xmlParser.getItemList(xml, sourceRank);
 
                      req.session.rssdata.push(rssdata);
                      req.session.save(); //--explicitly needed, otherwise session data is lost
 
                   } else {
                      console.log("error ",err);
-                     // res.req("error","ERROR: "+err);
-                     //res.render("user/index",{rssList:[], user:0});
                   }
                });
             });
