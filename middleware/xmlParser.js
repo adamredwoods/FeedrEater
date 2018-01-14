@@ -28,9 +28,10 @@ exports.getItemList = function(str) {
    for (let i=0; i<list.length; i++) {
       let imgurl="";
 
-      if(list[i].childNamed("media:content")) {
-         imgurl=list[i].childNamed("media:content").attr.url;
-      } else if(node.descendantWithPath("channel.image.url")) {
+      // if(list[i].childNamed("media:content")) {
+      //    imgurl=list[i].childNamed("media:content").attr.url;
+      // } else
+      if(node.descendantWithPath("channel.image.url")) {
          imgurl=node.descendantWithPath("channel.image.url").val;
       } else {
          //-- use just one letter if no image, handle this in display code

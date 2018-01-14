@@ -9,8 +9,6 @@ const mustache = require("mustache");
 
 router.get("/", isLoggedIn, function(req,res) {
 
-   var isRendering =0;
-
    db.user.findOne({
       where: {id: req.user.id},
       include: [db.rsslist]
@@ -23,9 +21,8 @@ router.get("/", isLoggedIn, function(req,res) {
       //-- get rss feed
       res.render("user/index", {rssList:list.rsslists.length, user:req.user.name});
 
-
          //--new lists, clear client side cache
-         io.sockets.emit("clearcache");
+         //io.sockets.emit("clearcache");
          req.session.rssTotal = list.rsslists.length;
          req.session.rssdata = [];
 
@@ -56,8 +53,9 @@ router.get("/", isLoggedIn, function(req,res) {
          }
 
    }).catch( function(err) {
+      console.log("db error",  err);
       var alerts = {"error": err};
-      io.sockets.emit("savecache"); //--soft reload
+      //io.sockets.emit("savecache"); //--soft reload
       res.render("user/index", {rssList:1, user:req.user.name, alerts});
    });
 });
@@ -70,6 +68,8 @@ router.get("/feeddata", isLoggedIn, function(req,res) {
       obj.data = req.session.rssdata.pop();
       //-- decrease total
       req.session.rssTotal--;
+   } else {
+      req.session.rssTotal=0;
    }
    res.send(obj);
 })
@@ -94,12 +94,12 @@ router.post("/add", isLoggedIn, function(req,res) {
          if (check) {
             addLink(req,res, req.body.rsslinktxt);
          } else {
-            console.log("Not valid url.");
+
             var alerts = {"error": "Not a valid URL"};
 
-            io.sockets.emit("savecache"); //--soft reload
-            res.render("user/index", {rssList:1, user:req.user.name, alerts});
-
+            //io.sockets.emit("savecache"); //--soft reload
+            //res.render("user/index", {rssList:1, user:req.user.name, alerts});
+            res.end();
          }
       });
    } else {
@@ -119,13 +119,15 @@ function addLink(req,res, link) {
 
          //--already added?
          if(links.length>0) {
-            res.end();
+            var alerts = {"error": "RSS feed exists in list"};
+            req.flash("error",alerts.error);
+            res.redirect("/user");
          } else {
 
             //--not added
             console.log("not found, ok to add..........");
             //-- get rss data
-            rss.get(link, function(err, data) {
+            rss.getRss(link, function(err, data) {
                //console.log(xmlParser.getTitle(data));
                db.rsslist.create({
                   url: link,
@@ -138,7 +140,9 @@ function addLink(req,res, link) {
                   }).then( function(d) {
                      //-- add rsslink success
                      var alerts = {"success": "New RSS added to list"};
-                     res.render("user/index", {alerts});
+                     req.flash("success",alerts.success);
+                     res.redirect("/user");
+                     //res.render("user/index", {alerts});
                   }).catch( function(err) {
                      var alerts = {"error": "DB add error "+err};
                      res.render("user/index", {alerts});
@@ -154,33 +158,7 @@ function addLink(req,res, link) {
          }
       }).catch( function(err){
          //
-         console.log("db search error..........");
-         //--grab XML data
-         //rss.get(req.body.rsslink, function(err, data) {
-            //console.log(xmlParser.getTitle(data));
-            // db.rsslist.create({
-            //    url: req.body.rsslink,
-            //    title: xmlParser.getTitle(data),
-            //
-            // }).then(function(rssData) {
-            //    //-- create join between tables
-            //    db.rssuser.create({
-            //       userId: req.user.id,
-            //       rssId: rssData.id
-            //    }).then( function(d) {
-            //       res.send("add success");
-            //    }).catch( function(err) {
-            //       res.send("db add error "+err+"     \n "+err.msg);
-            //    });
-            //
-            // }).catch(function(err){
-            //    console.log(err);
-            //    res.send("error");
-            // })
-            //console.log(err);
-
-         //});
-
+         console.log("db search error..........",err);
       });
    } else {
       res.end();

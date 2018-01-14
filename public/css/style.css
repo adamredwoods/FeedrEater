@@ -67,3 +67,20 @@ body {
    display: inline-block;
    font-size: 0.8em;
 }
+
+@keyframes fadeOutRed {
+	0% { background-color: rgba(255,0,0,0.3) }
+	100% { background-color: rgba(255,0,0,0) }
+}
+
+.fadeOutRed {
+   -webkit-animation: fadeOutRed 1s ; /* Safari 4+ */
+   -moz-animation:    fadeOutRed 1s ; /* Fx 5+ */
+   -o-animation:      fadeOutRed 1s ; /* Opera 12+ */
+   animation:         fadeOutRed 1s ; /* IE 10+, Fx 29+ */
+	/*opacity: rgba(255,0,0,0);*/
+}
+
+.sort-selector:hover {
+   color: #9b4dca;
+}

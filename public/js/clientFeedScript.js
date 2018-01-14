@@ -1,8 +1,26 @@
 const REQUEST_TIME = 100;
 
+//--event handler for sort button
+var sortTypes = ["All by Date", "By URL"];
+var currentSort = 0;
+var sortSelector = document.getElementsByClassName("sort-selector")[0];
+
+if(sortSelector) {
+   sortSelector.addEventListener("click",function(event) {
+      currentSort++;
+      if (currentSort>sortTypes.length-1) currentSort=0;
+      setSortText();
+   });
+
+   function setSortText() {
+      sortSelector.textContent = sortTypes[currentSort];
+   }
+
+   setSortText();
+}
+
 //--get data from server
 var interval = setInterval(getData,REQUEST_TIME);
-
 
 var feed = document.getElementsByClassName("feed")[0];
 var totalfeed=[];
@@ -12,11 +30,15 @@ var totalfeed=[];
 function update() {
    if(!feed) return;
 
-   totalfeed = totalfeed.sort(function(a,b) {
-      if (a.date>b.date) return -1;
-      if (a.date<b.date) return 1;
-      return 0;
-   });
+   if(currentSort===0) {
+      totalfeed = totalfeed.sort(function(a,b) {
+         if (a.date>b.date) return -1;
+         if (a.date<b.date) return 1;
+         return 0;
+      });
+   } else if(currentSort===1) {
+      
+   }
 
    var htmlfeed = document.createElement("div");
 
@@ -59,15 +81,15 @@ function update() {
       htmlfeed.appendChild(pp);
    }
 
-   while (feed.firstChild) {
-       feed.removeChild(feed.firstChild);
-   }
-   feed.appendChild(htmlfeed);
+   // while (feed.firstChild) {
+   //     feed.removeChild(feed.firstChild);
+   // }
+   // feed.appendChild(htmlfeed);
+   feed.replaceChild(htmlfeed, feed.childNodes[0]);
 }
 
 function appendFeed(data, cache) {
-   //if(!feed) return;
-   console.log(data);
+
    for(let i=0; i<data.length; i++) {
 
       //--implement a cache for current feed
@@ -81,9 +103,14 @@ function appendFeed(data, cache) {
 
 function getData() {
    ajax().get("/user/feeddata").then( function(res, xhr) {
+      //-- exit on server errors
+      if (xhr.status>=500) {
+         clearInterval(interval);
+         return;
+      }
+
       let obj = JSON.parse(xhr.response);
       if (obj.total>0) {
-         console.log(obj);
          if(obj.data) appendFeed(obj.data, true);
       } else {
          clearInterval(interval);

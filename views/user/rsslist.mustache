@@ -7,7 +7,7 @@
             <div class="row">
                <div class="rsslist-item column column-30">{{index}} - {{title}}</div>
                <div class="column text-center">
-                  <button name="delete" class="button-small">Delete</button>
+                  <button name="delete" class="button-small button-delete" value="{{id}}">Delete</button>
                </div>
             </div>
             <hr>
@@ -20,4 +20,5 @@
       </div>
    {{>endmenu}}
 </div>
+<script src="../js/clientFeedEdit.js"></script>
 {{>footer}}
