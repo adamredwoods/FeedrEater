@@ -60,7 +60,7 @@ passport.use(new TwitterStrategy({
                if(profile.emails) {
                   email = profile.emails[0].value;
                }
-   console.log(222);
+
                db.user.findOrCreate({
                   where: {twitterId: profile.id},
                   defaults: {
@@ -74,16 +74,16 @@ passport.use(new TwitterStrategy({
                   function(user, wasCreated) {
                      if(wasCreated) {
                         //-- new user
-   console.log(333);
+
                         return callback(null, user);
                      } else {
                         //-- something wrong on our end
-   console.log("err",err);
+                        console.log("err",err);
                         return callback(err, user);
                      }
                   }
-               ).catch(callback)
-console.log(999);
+               ).catch(callback);
+
             }
          });
     });

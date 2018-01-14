@@ -26,20 +26,23 @@ router.get("/", isLoggedIn, function(req,res) {
 
          //--new lists, clear client side cache
          io.sockets.emit("clearcache");
+         req.session.rssTotal = list.rsslists.length;
 
          for (let i=0; i<list.rsslists.length; i++) {
             //--this rss.get could use an LRU cache
             process.nextTick( ()=> {
-               rss.get(list.rsslists[i].url, function(err,xml) {
+               rss.getRss(list.rsslists[i].url, function(err,xml) {
                   if(!err) {
                      var rssdata = xmlParser.getItemList(xml);
 
                      //-- use sockets, global io
                      //--spacing out our emits, so client does not miss any
-                     var int = setInterval(()=>{
-                        io.sockets.emit("update", rssdata);
-                        clearInterval(int);
-                     }, 50*i);
+                     // var int = setInterval(()=>{
+                     //    io.sockets.emit("update", rssdata);
+                     //    clearInterval(int);
+                     // }, 50*i);
+
+                     req.session.rssdata[i] = rssdata;
 
                   } else {
                      console.log("error ",err);
@@ -56,6 +59,17 @@ router.get("/", isLoggedIn, function(req,res) {
       res.render("user/index", {rssList:1, user:req.user.name, alerts});
    });
 });
+
+//-- maintain our memory cache of rss data here
+router.get("/feeddata", isLoggedIn, function(req,res) {
+   let obj = {"total":req.session.rssTotal};
+   if (req.session.rssdata) {
+      obj.rssdata = req.session.rssdata.pop();
+      //-- decrease total 
+      req.session.rssTotal--;
+   }
+   res.send(obj);
+})
 
 router.get("/logout", isLoggedIn, function(req,res) {
    req.logout();

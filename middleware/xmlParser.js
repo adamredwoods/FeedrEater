@@ -19,7 +19,7 @@ exports.getTitle = function(str) {
 }
 
 exports.getItemList = function(str) {
-   //-- grab title, url, and date
+   //-- grab title, url, date, sourceUrl
    var node = new xmldoc.XmlDocument(str);
    var title = node.descendantWithPath("channel.title").val;
    var list = node.descendantWithPath("channel").childrenNamed("item");
@@ -37,7 +37,7 @@ exports.getItemList = function(str) {
          imgurl=title.slice(0,1);
       }
 
-      var source = node.descendantWithPath("channel.link").val.split("/")[2]; 
+      var source = node.descendantWithPath("channel.link").val.split("/")[2];
 
       returnList.push( {
          title: list[i].childNamed("title").val,

@@ -74,33 +74,33 @@ function appendFeed(data, cache) {
    update();
 }
 
-function setup() {
-
-   var socket = io.connect("/");
-
-   //-- the problem wiht sockets is that if the client is busy, it will not get the socket, so cache all incoming sockets
-   socket.on("update", function(data) {
-
-      //sessionStorage.setItem(session_name, JSON.stringify(data));
-      appendFeed(data, true);
-
-      console.log("ack");
-
-   });
-
-   socket.on("savecache", function(){
-      //console.log("cache");
-      //appendFeed(JSON.parse(sessionStorage.getItem(session_name)));
-      sessionStorage.setItem(session_name, JSON.stringify(totalfeed));
-   });
-
-   socket.on("clearcache", function(){
-      sessionStorage.setItem(session_name, "");
-      totalfeed = [];
-   });
-}
-
-setup();
-if(sessionStorage.getItem(session_name)) {
-   appendFeed(JSON.parse(sessionStorage.getItem(session_name)), false);
-}
+// function setup() {
+//
+//    var socket = io.connect("/");
+//
+//    //-- the problem wiht sockets is that if the client is busy, it will not get the socket, so cache all incoming sockets
+//    socket.on("update", function(data) {
+//
+//       //sessionStorage.setItem(session_name, JSON.stringify(data));
+//       appendFeed(data, true);
+//
+//       console.log("ack");
+//
+//    });
+//
+//    socket.on("savecache", function(){
+//       //console.log("cache");
+//       //appendFeed(JSON.parse(sessionStorage.getItem(session_name)));
+//       sessionStorage.setItem(session_name, JSON.stringify(totalfeed));
+//    });
+//
+//    socket.on("clearcache", function(){
+//       sessionStorage.setItem(session_name, "");
+//       totalfeed = [];
+//    });
+// }
+//
+// setup();
+// if(sessionStorage.getItem(session_name)) {
+//    appendFeed(JSON.parse(sessionStorage.getItem(session_name)), false);
+// }

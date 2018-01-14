@@ -40,6 +40,7 @@ app.use(function(req,res, next) {
 
 app.use("/auth", require("./controllers/auth"));
 app.use("/user", require("./controllers/user"));
+app.use("/rsslist", require("./controllers/rsslist"));
 
 app.get("/", function(req,res) {
    res.render("home");
