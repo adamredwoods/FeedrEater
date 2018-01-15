@@ -40,15 +40,58 @@ router.get("/", isLoggedIn, function(req,res) {
 });
 
 router.put("/", isLoggedIn, function(req,res) {
-   db.rssuser.findOne({
+   db.rssuser.findAll({
       where: {
-         userId: req.user.id,
-         rssId: req.body.rssId,
+         userId: req.user.id
       }
    }).then( function(rssuser){
       //TODO: if nothing is ranked, need to fill in data now
       //TODO: if something lese is same rank, re-rank everything
-      rssuser.userRank = req.body.newRank;
+      //everything is rank+b
+      //new thing is rank+a
+      //re-sort
+      //re-rank with b
+      //save
+
+      var tlist = [];
+      var tempItem, tnum=-1;
+
+      for (let i=0; i<rssuser.length; i++) {
+         console.log("....",rssuser[i].rssId,"  ",req.body.rssId);
+         if (rssuser[i].rssId != req.body.rssId) {
+            tlist.push({
+               id: i,
+               oldrank: rssuser[i].userRank,
+               newrank: 0
+            });
+         } else {
+            tnum = i;
+            console.log(555);
+         }
+      }
+
+      if (tnum===-1) {
+         console.log("rsslist: rank sort error");
+         res.end();
+         return;
+      }
+
+      tlist.sort(function(a,b) {
+         return a.oldrank-b.oldrank;
+      });
+
+      tlist.splice(req.body.newRank,0,{id: tnum, oldrank:0, newrank:0});
+console.log(tlist);
+      for (let i=0; i<tlist.length; i++) {
+         tlist[i].newrank =i+1;
+         console.log("newrank",i+1);
+      }
+
+      for(let j=0; j<rssuser.length; j++) {
+         rssuser[j].userRank = tlist[j].newrank;
+      }
+
+      //rssuser.userRank = req.body.newRank;
       rssuser.save().then( function(e) {
 
          res.end();

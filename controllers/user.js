@@ -32,7 +32,6 @@ router.get("/", isLoggedIn, function(req,res) {
                   if(!err) {
                      //-- passing user defined rank into object
                      var sourceRank = list.rsslists[i].rssuser.userRank;
-                     if (!sourceRank) sourceRank = i;
 
                      var rssdata = xmlParser.getItemList(xml, sourceRank);
 
@@ -132,34 +131,39 @@ function addLink(req,res, link) {
 
             //--not added
             console.log("not found, ok to add..........");
-            //-- get rss data
-            rss.getRss(link, function(err, data) {
-               //console.log(xmlParser.getTitle(data));
-               db.rsslist.create({
-                  url: link,
-                  title: xmlParser.getTitle(data)
-               }).then(function(rssData) {
-                  //-- create join between tables
-                  db.rssuser.create({
-                     userId: req.user.id,
-                     rssId: rssData.id
-                  }).then( function(d) {
-                     //-- add rsslink success
-                     var alerts = {"success": "New RSS added to list"};
-                     req.flash("success",alerts.success);
-                     res.redirect("/user");
-                     //res.render("user/index", {alerts});
-                  }).catch( function(err) {
-                     var alerts = {"error": "DB add error "+err};
-                     res.render("user/index", {alerts});
-                  });
+            //-- get count
+            db.rssuser.count({where: {userId: req.user.id}}).then( function(rssTotal) {
+               //-- get rss data
+               rss.getRss(link, function(err, data) {
+                  //console.log(xmlParser.getTitle(data));
+                  db.rsslist.create({
+                     url: link,
+                     title: xmlParser.getTitle(data)
+                  }).then(function(rssData) {
+                     //-- create join between tables
+                     db.rssuser.create({
+                        userId: req.user.id,
+                        rssId: rssData.id,
+                        userRank: rssTotal+1
+                     }).then( function(d) {
+                        //-- add rsslink success
+                        var alerts = {"success": "New RSS added to list"};
+                        req.flash("success",alerts.success);
+                        res.redirect("/user");
+                        //res.render("user/index", {alerts});
+                     }).catch( function(err) {
+                        var alerts = {"error": "DB add error "+err};
+                        res.render("user/index", {alerts});
+                     });
 
-               }).catch(function(err){
+                  }).catch(function(err){
+                     console.log(err);
+                     var alerts = {"error": "DB error "+err};
+                     res.render("user/index", {alerts});
+                  })
                   console.log(err);
-                  var alerts = {"error": "DB error "+err};
-                  res.render("user/index", {alerts});
-               })
-               console.log(err);
+               });
+
             });
          }
       }).catch( function(err){
