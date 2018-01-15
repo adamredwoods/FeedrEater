@@ -121,7 +121,6 @@ function createSortBySiteFeed() {
       if (currentSource !== totalfeed[i].source) {
 
          pp = document.createElement("p");
-         pp.textContent = totalfeed[i].sourceRank;
          if (i!==0) {
             var hr = document.createElement("hr");
             pp.appendChild(hr);

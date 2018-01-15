@@ -57,7 +57,6 @@ router.put("/", isLoggedIn, function(req,res) {
       var tempItem, tnum=-1;
 
       for (let i=0; i<rssuser.length; i++) {
-         console.log("....",rssuser[i].rssId,"  ",req.body.rssId);
          if (rssuser[i].rssId != req.body.rssId) {
             tlist.push({
                id: i,
@@ -66,12 +65,10 @@ router.put("/", isLoggedIn, function(req,res) {
             });
          } else {
             tnum = i;
-            console.log(555);
          }
       }
 
       if (tnum===-1) {
-         console.log("rsslist: rank sort error");
          res.end();
          return;
       }
@@ -81,24 +78,28 @@ router.put("/", isLoggedIn, function(req,res) {
       });
 
       tlist.splice(req.body.newRank,0,{id: tnum, oldrank:0, newrank:0});
-console.log(tlist);
+
       for (let i=0; i<tlist.length; i++) {
          tlist[i].newrank =i+1;
-         console.log("newrank",i+1);
       }
 
+      //--TODO: HOW TO DO BULK SAVES???
       for(let j=0; j<rssuser.length; j++) {
          rssuser[j].userRank = tlist[j].newrank;
+         rssuser[j].save();
       }
 
-      //rssuser.userRank = req.body.newRank;
-      rssuser.save().then( function(e) {
 
-         res.end();
-      }).catch( function(err) {
-         console.log("DB Save() error ",err);
-         res.end();
-      })
+      res.end();
+
+      //rssuser.userRank = req.body.newRank;
+      // rssuser.save().then( function(e) {
+      //
+      //    res.end();
+      // }).catch( function(err) {
+      //    console.log("DB Save() error ",err);
+      //    res.end();
+      // })
    }).catch( function(err) {
       var alerts = {"error": "DB error "+err};
       console.log("DB error ",alerts.error);
