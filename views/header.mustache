@@ -14,8 +14,19 @@
    <body>
       {{>alert}}
       <div class="row">
-         <div class="column column-10"></div>
-         <div class="column padding-50">
-            <h1>FeederEatr</h1>
+         <div class="column headline-logo ">
+            <h1 class="padding-10">FeederEatr</h1>
+            <div class="headline-login text-right">
+               {{#login}}
+                  {{^user}}
+                     <a class="button" href="/user">Login</a>
+                  {{/user}}
+                  {{#user}}
+                     <a class="button" href="/user">{{user}}</a>
+                     {{/user}}
+               {{/login}}
+               {{^login}}
+               {{/login}}
+            </div>
          </div>
       </div>

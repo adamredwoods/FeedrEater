@@ -18,18 +18,16 @@ router.get("/", isLoggedIn, function(req,res) {
          list = [];
       }
 
-      //-- get rss feed
-      res.render("user/index", {rssList:list.rsslists.length, user:req.user.name});
+      //--new lists, clear client side cache
+      //io.sockets.emit("clearcache");
 
-         //--new lists, clear client side cache
-         //io.sockets.emit("clearcache");
+      req.session.rssTotal = list.rsslists.length;
+      req.session.rssdata = [];
 
-         req.session.rssTotal = list.rsslists.length;
-         req.session.rssdata = [];
-
-         for (let i=0; i<list.rsslists.length; i++) {
-            //--this rss.get could use an LRU cache
-            process.nextTick( ()=> {
+      for (let i=0; i<list.rsslists.length; i++) {
+         //--this rss.get could use an LRU cache
+         process.nextTick( ()=> {
+            if (list.rsslists[i].url) {
                rss.getRss(list.rsslists[i].url, function(err, xml) {
                   if(!err) {
                      //-- passing user defined rank into object
@@ -38,15 +36,22 @@ router.get("/", isLoggedIn, function(req,res) {
 
                      var rssdata = xmlParser.getItemList(xml, sourceRank);
 
-                     req.session.rssdata.push(rssdata);
-                     req.session.save(); //--explicitly needed, otherwise session data is lost
+                     if(rssdata) {
+                        req.session.rssdata.push(rssdata);
+                        req.session.save(); //--explicitly needed, otherwise session data is lost
+                     }
 
                   } else {
-                     console.log("error ",err);
+                     console.log("getRss error ",err);
                   }
                });
-            });
-         }
+            }
+         });
+      }
+
+
+      //-- get rss feed
+      res.render("user/index", {rssList:list.rsslists.length, user:req.user.name});
 
    }).catch( function(err) {
       console.log("db error",  err);
@@ -58,22 +63,27 @@ router.get("/", isLoggedIn, function(req,res) {
 
 //-- maintain our memory cache of rss data here
 router.get("/feeddata", isLoggedIn, function(req,res) {
-   let obj = {"total":req.session.rssTotal};
+   let obj = {
+      "total": req.session.rssTotal,
+      data: {}
+   };
 
-   if (req.session.rssdata.length>0) {
+   if (req.session.rssdata.length>0 && req.session.rssTotal>0) {
       obj.data = req.session.rssdata.pop();
       //-- decrease total
-      req.session.rssTotal--;
+      console.log(req.session.rssTotal);
+      //req.session.rssTotal--;
    } else {
       req.session.rssTotal=0;
    }
    res.send(obj);
+
 })
 
 router.get("/logout", isLoggedIn, function(req,res) {
    req.logout();
    var alerts = {"success": "User is logged out"};
-   res.render("home", {alerts});
+   res.redirect("/");
 });
 
 router.get("/add", isLoggedIn, function(req,res) {

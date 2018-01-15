@@ -20,18 +20,48 @@ function getRssList(req,res, callback) {
 
 router.get("/", isLoggedIn, function(req,res) {
 
-      getRssList(req,res, function(data) {
-         var index=0;
-         res.render("user/rsslist", {
-            rsslist:data,
-            user:req.user.name,
-            index: function() {
-              return ++index;
-            }
-         });
-      })
+   getRssList(req,res, function(data) {
+      var index=0;
+      data = data.sort( function(a,b) {
+         if(!a.rssuser.userRank) a.rssuser.userRank = 9999;
+         if(!b.rssuser.userRank) b.rssuser.userRank = 9999;
+         return a.rssuser.userRank-b.rssuser.userRank;
+      });
+
+      res.render("user/rsslist", {
+         rsslist:data,
+         user:req.user.name,
+         index: function() {
+           return ++index;
+         }
+      });
+   })
 
 });
+
+router.put("/", isLoggedIn, function(req,res) {
+   db.rssuser.findOne({
+      where: {
+         userId: req.user.id,
+         rssId: req.body.rssId,
+      }
+   }).then( function(rssuser){
+      //TODO: if nothing is ranked, need to fill in data now
+      //TODO: if something lese is same rank, re-rank everything
+      rssuser.userRank = req.body.newRank;
+      rssuser.save().then( function(e) {
+
+         res.end();
+      }).catch( function(err) {
+         console.log("DB Save() error ",err);
+         res.end();
+      })
+   }).catch( function(err) {
+      var alerts = {"error": "DB error "+err};
+      console.log("DB error ",alerts.error);
+      res.end();
+   });
+})
 
 router.post("/delete", isLoggedIn, function(req,res) {
    db.rsslist.destroy({
@@ -39,19 +69,7 @@ router.post("/delete", isLoggedIn, function(req,res) {
       include: [db.user]
    }).then(function(data){
       var alerts = {"success":"Deleted RSS Feed"};
-      // getRssList(req,res, function(data) {
 
-         // var index=0;
-         // res.render("user/rsslist", {
-         //    rsslist:data,
-         //    user:req.user.name,
-         //    alerts,
-         //    index: function() {
-         //      return ++index;
-         //    }
-         // });
-      // });
-      // res.render("user/rsslist");
       process.nextTick( ()=> {
          var alerts = {"success":"Deleted RSS Feed"};
          req.method="get";

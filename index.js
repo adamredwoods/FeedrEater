@@ -43,7 +43,9 @@ app.use("/user", require("./controllers/user"));
 app.use("/rsslist", require("./controllers/rsslist"));
 
 app.get("/", function(req,res) {
-   res.render("home");
+   let name="";
+   if (req.user) name = req.user.name;
+   res.render("home", {user: name, login:true});
 });
 
 server = app.listen(process.env.PORT || 3000);

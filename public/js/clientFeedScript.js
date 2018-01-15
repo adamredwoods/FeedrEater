@@ -1,9 +1,11 @@
 const REQUEST_TIME = 100;
 
+//
 //--event handler for sort button
 var sortTypes = ["All by Date", "By URL"];
 var currentSort = 0;
 var sortSelector = document.getElementsByClassName("sort-selector")[0];
+var lastReceived = "";
 
 if(sortSelector) {
    sortSelector.addEventListener("click",function(event) {
@@ -18,13 +20,13 @@ function setSortText() {
    sortSelector.textContent = sortTypes[currentSort];
 }
 
-
-
+//
+//
 //--get data from server
-var interval = setInterval(getData,REQUEST_TIME);
-
 var feed = document.getElementsByClassName("feed")[0];
 var totalfeed=[];
+
+var interval = setInterval(getData,REQUEST_TIME);
 
 //--could appendFeed to totalfeed, then call update feed where updateFeed will sort and display
 
@@ -64,13 +66,15 @@ function createSortByDateFeed() {
    var htmlfeed = document.createElement("div");
 
    for(let i=0; i<totalfeed.length; i++) {
+
       var pp = document.createElement("p");
+
       var line1 = document.createElement("div");
       line1.setAttribute("class","rsslist-image");
       var img = document.createElement("img");
       img.setAttribute("src",totalfeed[i].imgurl);
-      img.setAttribute("width","80px");
-      img.setAttribute("style","display:inline; margin-right:20px;");
+      img.setAttribute("width","120px");
+      img.setAttribute("style","display:inline; margin-right:20px");
 
       if(totalfeed[i].imgurl.length<3) {
          img.setAttribute("src","");
@@ -115,7 +119,14 @@ function createSortBySiteFeed() {
    for(let i=0; i<totalfeed.length; i++) {
 
       if (currentSource !== totalfeed[i].source) {
+
          pp = document.createElement("p");
+         pp.textContent = totalfeed[i].sourceRank;
+         if (i!==0) {
+            var hr = document.createElement("hr");
+            pp.appendChild(hr);
+         }
+
          var line1 = document.createElement("div");
          //line1.setAttribute("class","rsslist-image");
          var img = document.createElement("img");
@@ -125,10 +136,17 @@ function createSortBySiteFeed() {
 
          if(totalfeed[i].imgurl.length<3) {
             img.setAttribute("src","");
-            img = document.createElement("h2");
+            img = document.createElement("div");
+            img.setAttribute("class","source-tag-h2");
             img.textContent = totalfeed[i].imgurl[0];
          }
          line1.appendChild(img);
+
+         var source = document.createElement("div");
+         source.setAttribute("class","source-tag-h2");
+         source.textContent = totalfeed[i].source;
+         line1.appendChild(source);
+
          pp.appendChild(line1);
          currentSource = totalfeed[i].source;
       }
@@ -142,10 +160,7 @@ function createSortBySiteFeed() {
       a.setAttribute("target","_blank");
       titleblock.appendChild(a);
       var line2 = document.createElement("div");
-      var source = document.createElement("div");
-      source.setAttribute("class","source-tag");
-      source.textContent = totalfeed[i].source;
-      line2.appendChild(source);
+
       var date = document.createElement("span");
       date.textContent = totalfeed[i].date;
 
@@ -182,11 +197,16 @@ function getData() {
 
       let obj = JSON.parse(xhr.response);
       if (obj.total>0) {
-         if(obj.data) appendFeed(obj.data, true);
+         if(obj.data && obj.data[0] && obj.data[0].source !== lastReceived) {
+            lastReceived = obj.data[0].source;
+            appendFeed(obj.data, true);
+         }
       } else {
+         lastReceived ="";
          clearInterval(interval);
       }
    })
 }
 
+//--sort first time
 setSortText();

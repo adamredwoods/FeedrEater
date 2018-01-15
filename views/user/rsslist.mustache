@@ -7,7 +7,10 @@
             <div class="row">
                <div class="rsslist-item column column-30">{{index}} - {{title}}</div>
                <div class="column text-center">
-                  <button name="delete" class="button-small button-delete" value="{{id}}">Delete</button>
+                  <input type="text" class="input-rank input-rank-{{id}}" size="4" name="ranknum"><button name="rank" class="button-small button-rank" value="{{id}}">Set Rank</button>
+               </div>
+               <div class="column text-center">
+                  <button name="delete" class="button-small button-delete " value="{{id}}">Delete</button>
                </div>
             </div>
             <hr>
@@ -16,9 +19,10 @@
    </div>
    {{>menu}}
       <div class="card margin-10 padding-10 text-center">
-         <a href="/user" class="button">View feed</a>
+         <a href="/user" class="button ">View feed</a>
       </div>
    {{>endmenu}}
 </div>
-<script src="../js/clientFeedEdit.js"></script>
+
 {{>footer}}
+<script src="../js/clientFeedEdit.js"></script>
