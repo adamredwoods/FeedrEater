@@ -32,6 +32,7 @@
 * Mustache templating
 * Express
 * Sequelize
+* https://github.com/fdaciuk/ajax
 
 
 ## What Was Difficult
