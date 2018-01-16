@@ -101,10 +101,8 @@ router.post("/add", isLoggedIn, function(req,res) {
          } else {
 
             var alerts = {"error": "Not a valid URL"};
-
-            //io.sockets.emit("savecache"); //--soft reload
-            //res.render("user/index", {rssList:1, user:req.user.name, alerts});
-            res.end();
+            req.flash("error", alerts.error);
+            res.redirect("/user", {rssList:1, user:req.user.name, alerts});
          }
       });
    } else {
@@ -114,66 +112,83 @@ router.post("/add", isLoggedIn, function(req,res) {
 
 function addLink(req,res, link) {
    if (link) {
+      //--is this a valid rss?
+      rss.getRss(link, function(err, data) {
+         //if so, find or create it
 
-      console.log("add rss link ",link);
-
-      db.rsslist.findAll({
-         where: { url: link },
-         include: [{model:db.user, where: {id: req.user.id}}]
-      }).then( function(links){
-
-         //--already added?
-         if(links.length>0) {
-            var alerts = {"error": "RSS feed exists in list"};
-            req.flash("error",alerts.error);
-            res.redirect("/user");
-         } else {
-
-            //--not added
-            console.log("not found, ok to add..........");
-            //-- get count
-            db.rssuser.count({where: {userId: req.user.id}}).then( function(rssTotal) {
-               //-- get rss data
-               rss.getRss(link, function(err, data) {
-                  //console.log(xmlParser.getTitle(data));
-                  db.rsslist.create({
-                     url: link,
-                     title: xmlParser.getTitle(data)
-                  }).then(function(rssData) {
-                     //-- create join between tables
-                     db.rssuser.create({
-                        userId: req.user.id,
-                        rssId: rssData.id,
-                        userRank: rssTotal+1
-                     }).then( function(d) {
-                        //-- add rsslink success
-                        var alerts = {"success": "New RSS added to list"};
-                        req.flash("success",alerts.success);
+         if (!err) {
+            let title = xmlParser.getTitle(data);
+            db.rsslist.findOrCreate({
+               where: { url: link },
+               defaults: {
+                  title: title
+               }
+            }).spread( function(rsslist, wasCreated) {
+               if (wasCreated) {
+                  //make new url, then add to rssuser
+                  addRssToUserDb(req,res,link,rsslist.id);
+               } else {
+                  //url exists elsewhere, does it exist in rssuser, if not add to rssuser
+                  db.rssuser.findAll({
+                     where: {rssId: rsslist.id, userId: req.user.id}
+                  }).then( function(rsslinks) {
+                     if(rsslinks.length>0) {
+                        var alerts = {"error": "RSS feed exists in list"};
+                        req.flash("error", alerts.error);
                         res.redirect("/user");
-                        //res.render("user/index", {alerts});
-                     }).catch( function(err) {
-                        var alerts = {"error": "DB add error "+err};
-                        res.render("user/index", {alerts});
-                     });
-
-                  }).catch(function(err){
+                     } else {
+                        addRssToUserDb(req,res,link,rsslist.id);
+                     }
+                  }). catch(function(err) {
                      console.log(err);
                      var alerts = {"error": "DB error "+err};
                      res.render("user/index", {alerts});
                   })
-                  console.log(err);
-               });
-
+               }
+            }).catch( function(err) {
+               console.log(err);
+               var alerts = {"error": "DB error "+err};
+               res.render("user/index", {alerts});
             });
+         } else {
+            console.log("invalid rss url");
+            var alerts = {"error": "URL is not a valid RSS"};
+            req.flash("error", alerts.error);
+            res.redirect("/user");
          }
-      }).catch( function(err){
-         //
-         console.log("db search error..........",err);
       });
-   } else {
-      res.end();
    }
-};
+
+}
+
+
+function addRssToUserDb(req, res, link, rssId) {
+   //-- get count
+   db.rssuser.count({where: {userId: req.user.id}}).then( function(rssTotal) {
+
+         //-- create join between tables
+         db.rssuser.create({
+            userId: req.user.id,
+            rssId: rssId,
+            userRank: rssTotal+1
+         }).then( function(d) {
+            //-- add rsslink success
+            var alerts = {"success": "New RSS added to list"};
+            req.flash("success",alerts.success);
+            res.redirect("/user");
+            //res.render("user/index", {alerts});
+         }).catch( function(err) {
+            var alerts = {"error": "DB add error "+err};
+            res.render("user/index", {alerts});
+         });
+      //});
+   }).catch( function (err) {
+      console.log("DB error: rssuser add ",err);
+   });
+
+}
+
+
 
 
 
