@@ -83,7 +83,7 @@ router.put("/", isLoggedIn, function(req,res) {
       });
 
       tlist.splice(req.body.newRank-1,0,{id: tnum, oldrank:0, newrank:0});
-console.log(tlist," ",req.body.newRank-1);
+
       for (let i=0; i<tlist.length; i++) {
          tlist[i].newrank =i+1;
       }

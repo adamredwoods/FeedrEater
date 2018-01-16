@@ -1,5 +1,5 @@
 var passport = require("passport");
-// var localStrategy = require("passport-local").Strategy;
+var localStrategy = require("passport-local").Strategy;
 var TwitterStrategy = require("passport-twitter").Strategy;
 var db = require("../models");
 require("dotenv").config;
@@ -17,22 +17,22 @@ passport.deserializeUser(function(id, callback) {
    });
 });
 
-// passport.use(new localStrategy({
-//       usernameField: "email",
-//       passwordField: "password"
-//    }, function(email, password, callback) {
-//       db.user.findOne({
-//          where: { email:email }
-//       }).then( function(user) {
-//          if(!user|| !user.isValidPassword(password)) {
-//             callback(null,false);
-//          } else {
-//             callback(null, user);
-//          }
-//       }).catch( function(err) {
-//          callback(err,null);
-//       });
-// }));
+passport.use(new localStrategy({
+      usernameField: "email",
+      passwordField: "password"
+   }, function(email, password, callback) {
+      db.user.findOne({
+         where: { email:email }
+      }).then( function(user) {
+         if(!user|| !user.isValidPassword(password)) {
+            callback(null,false);
+         } else {
+            callback(null, user);
+         }
+      }).catch( function(err) {
+         callback(err,null);
+      });
+}));
 
 
 passport.use(new TwitterStrategy({

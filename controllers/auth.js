@@ -20,31 +20,31 @@ router.get("/signup", function(req,res){
 });
 
 router.post("/signup", function(req,res, next) {
-   console.log("signup req.body is", req.body);
-   // db.user.findOrCreate({
-   //    where: {email: req.body.email},
-   //    defaults: {
-   //       username: req.body.username,
-   //       firstname: req.body.firstname,
-   //       lastname: req.body.lastname,
-   //       password: req.body.password
-   //    }
-   // }).spread(function(user, wasCreated){
-   //    if(wasCreated) {
-   //       //was not found in database
-   //       passport.authenticate("local", {
-   //          successRedirect: "/profile",
-   //          successFlash: "User created"
-   //       })(req, res, next);
-   //    } else {
-   //       //-- duplicate user
-   //       req.flash("error", "User exists, choose a different username");
-   //       res.redirect("/auth/login"); //--can I just res.end here?
-   //    }
-   // }).catch(function(err) {
-   //    req.flash("error", err.message);
-   //    res.redirect("/auth/login");
-   // })
+
+   db.user.findOrCreate({
+      where: {email: req.body.email},
+      defaults: {
+         username: req.body.username,
+         firstname: req.body.firstname,
+         lastname: req.body.lastname,
+         password: req.body.password
+      }
+   }).spread(function(user, wasCreated){
+      if(wasCreated) {
+         //was not found in database
+         passport.authenticate("local", {
+            successRedirect: "/profile",
+            successFlash: "New user created"
+         })(req, res, next);
+      } else {
+         //-- duplicate user
+         req.flash("error", "User exists, choose a different username");
+         res.redirect("/auth/login"); //--can I just res.end here?
+      }
+   }).catch(function(err) {
+      req.flash("error", err.message);
+      res.redirect("/auth/login");
+   });
 });
 
 router.get("/twitter", passport.authenticate("twitter"));

@@ -176,34 +176,33 @@ function createSortBySiteFeed() {
 function appendFeed(data, cache) {
 
    for(let i=0; i<data.length; i++) {
-
       //--implement a cache for current feed
       if(cache) {
          totalfeed.push(data[i]);
       }
    }
-
    update();
+   
 }
 
 function getData() {
    ajax().get("/user/feeddata").then( function(res, xhr) {
       //-- exit on server errors
-      if (xhr.status>=500) {
+
+      if (xhr.status!==200 || !res.total) {
          clearInterval(interval);
          return;
-      }
-
-      let obj = JSON.parse(xhr.response);
-      if (obj.total>0) {
-         if(obj.data && obj.data[0] && obj.data[0].source !== lastReceived) {
-            console.log("....."+obj.data);
-            lastReceived = obj.data[0].source;
-            appendFeed(obj.data, true);
-         }
       } else {
-         lastReceived ="";
-         clearInterval(interval);
+         let obj = JSON.parse(xhr.response);
+         if (obj.total>0) {
+            if(obj.data && obj.data[0] && obj.data[0].source !== lastReceived) {
+               lastReceived = obj.data[0].source;
+               appendFeed(obj.data, true);
+            }
+         } else {
+            lastReceived ="";
+            clearInterval(interval);
+         }
       }
    })
 }
