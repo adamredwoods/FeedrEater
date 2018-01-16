@@ -83,7 +83,7 @@ router.put("/", isLoggedIn, function(req,res) {
          tlist[i].newrank =i+1;
       }
 
-      //--TODO: HOW TO DO BULK SAVES???
+      //--TODO: HOW TO DO BULK SAVE PROMISES???
       for(let j=0; j<rssuser.length; j++) {
          rssuser[j].userRank = tlist[j].newrank;
          rssuser[j].save();
@@ -108,9 +108,11 @@ router.put("/", isLoggedIn, function(req,res) {
 })
 
 router.post("/delete", isLoggedIn, function(req,res) {
-   db.rsslist.destroy({
-      where: {id: req.body.id},
-      include: [db.user]
+   db.rssuser.destroy({
+      where: {
+         rssId: req.body.id,
+         userId: req.user.id
+       }
    }).then(function(data){
       var alerts = {"success":"Deleted RSS Feed"};
 
