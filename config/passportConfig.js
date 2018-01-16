@@ -43,7 +43,7 @@ passport.use(new localStrategy({
 passport.use(new TwitterStrategy({
     consumerKey: process.env.TWITTER_CONSUMER_KEY,
     consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-    callbackURL: process.env.BASE_URL+"/auth/twitter/callback"
+    callbackURL: "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, callback) {
     process.nextTick( function() {
