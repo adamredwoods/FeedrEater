@@ -32,15 +32,44 @@ body {
    text-align: right;
 }
 
-.menu {
+.text-left {
+   text-align: left;
+}
+
+#menu {
    display: block;
 }
 
+#menu-mobile {
+   display: none;
+   position: absolute;
+   top: 10px;
+   text-align: right;
+   width: 100%;
+   /*left:100%;*/
+   /*margin-left: 85%;*/
+}
+
 @media (max-width: 60.0rem) {
-   .menu {
+   #menu {
       display: none;
-      visibility: hidden;
+      position: absolute;
+      z-index: 999;
+      background-color: #fff;
+
+      top: 75px;
+      max-width:50%;
+      left: 50%;
    }
+
+   #menu .row {
+      text-align: right;
+   }
+
+   #menu-mobile {
+      display: block;
+   }
+
 }
 
 .rsslist-image {

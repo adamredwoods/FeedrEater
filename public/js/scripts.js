@@ -20,3 +20,15 @@ window.addEventListener("scroll", function() {
       }
    });
 });
+
+var mobilemenu = document.getElementById("menu-mobile");
+if (mobilemenu){
+   mobilemenu.addEventListener("click", function(evt) {
+      var m2 = document.getElementById("menu");
+      if (m2.style.display=="inline-block") {
+         m2.style.display="none";
+      } else {
+         m2.style.display="inline-block";
+      }
+   });
+}
