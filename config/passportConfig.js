@@ -3,6 +3,11 @@ var localStrategy = require("passport-local").Strategy;
 var TwitterStrategy = require("passport-twitter").Strategy;
 var db = require("../models");
 require("dotenv").config;
+var bcrypt = require("bcrypt");
+
+function isValidPassword(user, passwordTyped) {
+   return bcrypt.compareSync(passwordTyped, user.password);
+}
 
 passport.serializeUser(function(user, callback) {
    callback(null, user.id);
@@ -24,7 +29,7 @@ passport.use(new localStrategy({
       db.user.findOne({
          where: { email:email }
       }).then( function(user) {
-         if(!user|| !user.isValidPassword(password)) {
+         if(!user|| !isValidPassword(user, password)) {
             callback(null,false);
          } else {
             callback(null, user);

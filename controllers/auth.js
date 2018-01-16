@@ -2,48 +2,51 @@ const express = require("express");
 const passport = require("../config/passportConfig");
 const db = require('../models');
 const router = express.Router();
+const bcrypt = require("bcrypt");
 
+const SALT_ROUNDS=10;
 
 router.get("/login", function(req,res) {
    res.render("auth/login");
 });
 
 router.post("/login", passport.authenticate("local", {
-   successRedirect: "/user/index",
+   successRedirect: "/user",
    successFlash: "Login Successful",
    failureRedirect: "/auth/login",
    failureFlash: "Invalid username or password."
 }));
 
 router.get("/signup", function(req,res){
-   res.send ("auth signup");
+   res.render("auth/signup");
 });
 
 router.post("/signup", function(req,res, next) {
-
-   db.user.findOrCreate({
-      where: {email: req.body.email},
-      defaults: {
-         username: req.body.username,
-         firstname: req.body.firstname,
-         lastname: req.body.lastname,
-         password: req.body.password
-      }
-   }).spread(function(user, wasCreated){
-      if(wasCreated) {
-         //was not found in database
-         passport.authenticate("local", {
-            successRedirect: "/profile",
-            successFlash: "New user created"
-         })(req, res, next);
-      } else {
-         //-- duplicate user
-         req.flash("error", "User exists, choose a different username");
-         res.redirect("/auth/login"); //--can I just res.end here?
-      }
-   }).catch(function(err) {
-      req.flash("error", err.message);
-      res.redirect("/auth/login");
+   bcrypt.hash(req.body.password, SALT_ROUNDS, function(err, hash) {
+      // Store hash in your password DB.
+        db.user.findOrCreate({
+           where: {email: req.body.email},
+           defaults: {
+              name: req.body.name,
+              profileText: req.body.profileText,
+              password: hash
+           }
+        }).spread(function(user, wasCreated){
+           if(wasCreated) {
+              //was not found in database
+              passport.authenticate("local", {
+                successRedirect: "/profile",
+                successFlash: "New user created"
+             })(req, res, next);
+          } else {
+             //-- duplicate user
+             req.flash("error", "User exists, choose a different username");
+             res.redirect("/auth/login"); //--can I just res.end here?
+          }
+       }).catch(function(err) {
+         req.flash("error", err.message);
+         res.redirect("/auth/login");
+      });
    });
 });
 
