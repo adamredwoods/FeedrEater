@@ -35,7 +35,7 @@ router.post("/signup", function(req,res, next) {
            if(wasCreated) {
               //was not found in database
               passport.authenticate("local", {
-                successRedirect: "/profile",
+                successRedirect: "/user",
                 successFlash: "New user created"
              })(req, res, next);
           } else {
