@@ -1,4 +1,4 @@
-This is a server-client based project where this site will keep your RSS feeds in one place and allow you to read the titles in one feed.
+This is a server-client based project to keep your RSS feeds in one place and allow you to see the titles of interesting articles in one feed.
 
 ## Technical Requirements
 * Build an app
