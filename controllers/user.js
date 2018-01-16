@@ -72,8 +72,10 @@ router.get("/feeddata", isLoggedIn, function(req,res) {
       //-- decrease total
       console.log(req.session.rssTotal);
       //req.session.rssTotal--;
-   } else {
+   } else if (req.session.rssTotal===0){
       req.session.rssTotal=0;
+      req.session.rssdata=[];
+      obj.data={};
    }
    res.send(obj);
 
@@ -142,19 +144,19 @@ function addLink(req,res, link) {
                   }). catch(function(err) {
                      console.log(err);
                      var alerts = {"error": "DB error "+err};
-                     res.render("user/index", {alerts});
+                     res.redirect("/user", {alerts});
                   })
                }
             }).catch( function(err) {
                console.log(err);
                var alerts = {"error": "DB error "+err};
-               res.render("user/index", {alerts});
+               res.redirect("/user", {alerts});
             });
          } else {
             console.log("invalid rss url");
             var alerts = {"error": "URL is not a valid RSS"};
             req.flash("error", alerts.error);
-            res.redirect("/user");
+            res.redirect("/user", {alerts});
          }
       });
    }
@@ -179,7 +181,7 @@ function addRssToUserDb(req, res, link, rssId) {
             //res.render("user/index", {alerts});
          }).catch( function(err) {
             var alerts = {"error": "DB add error "+err};
-            res.render("user/index", {alerts});
+            res.redirect("/user", {alerts});
          });
       //});
    }).catch( function (err) {

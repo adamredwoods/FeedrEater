@@ -40,6 +40,11 @@ router.get("/", isLoggedIn, function(req,res) {
 });
 
 router.put("/", isLoggedIn, function(req,res) {
+   if (req.body.newRank<1) {
+      res.end();
+      return;
+   }
+
    db.rssuser.findAll({
       where: {
          userId: req.user.id
@@ -77,15 +82,15 @@ router.put("/", isLoggedIn, function(req,res) {
          return a.oldrank-b.oldrank;
       });
 
-      tlist.splice(req.body.newRank,0,{id: tnum, oldrank:0, newrank:0});
-
+      tlist.splice(req.body.newRank-1,0,{id: tnum, oldrank:0, newrank:0});
+console.log(tlist," ",req.body.newRank-1);
       for (let i=0; i<tlist.length; i++) {
          tlist[i].newrank =i+1;
       }
 
       //--TODO: HOW TO DO BULK SAVE PROMISES???
-      for(let j=0; j<rssuser.length; j++) {
-         rssuser[j].userRank = tlist[j].newrank;
+      for(let j=0; j<tlist.length; j++) {
+         rssuser[tlist[j].id].userRank = tlist[j].newrank;
          rssuser[j].save();
       }
 

@@ -197,6 +197,7 @@ function getData() {
       let obj = JSON.parse(xhr.response);
       if (obj.total>0) {
          if(obj.data && obj.data[0] && obj.data[0].source !== lastReceived) {
+            console.log("....."+obj.data);
             lastReceived = obj.data[0].source;
             appendFeed(obj.data, true);
          }

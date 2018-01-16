@@ -20,6 +20,11 @@ exports.getTitle = function(str) {
 
 exports.getItemList = function(str, sourceRank) {
    //-- grab title, url, date, sourceUrl
+   if(!str) {
+      console.log("XMLError: no XML");
+      return;
+   }
+   
    var node = new xmldoc.XmlDocument(str);
    var title = node.descendantWithPath("channel.title").val;
    var list = node.descendantWithPath("channel").childrenNamed("item");
