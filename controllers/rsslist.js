@@ -5,6 +5,7 @@ const router = express.Router();
 const isLoggedIn = require("../middleware/isLoggedIn");
 const rss = require("../middleware/rss");
 const mustache = require("mustache");
+const async = require("async");
 
 function getRssList(req,res, callback) {
    db.user.findAll({
@@ -83,28 +84,29 @@ router.put("/", isLoggedIn, function(req,res) {
       });
 
       tlist.splice(req.body.newRank-1,0,{id: tnum, oldrank:0, newrank:0});
-
+console.log(tlist);
       for (let i=0; i<tlist.length; i++) {
          tlist[i].newrank =i+1;
       }
-
+console.log(tlist);
       //--TODO: HOW TO DO BULK SAVE PROMISES???
-      for(let j=0; j<tlist.length; j++) {
-         rssuser[tlist[j].id].userRank = tlist[j].newrank;
-         rssuser[j].save();
-      }
+      // for(let j=0; j<tlist.length; j++) {
+      //    rssuser[tlist[j].id].userRank = tlist[j].newrank;
+      //    rssuser[j].save();
+      // }
+      // res.end();
+
+      async.eachSeries(tlist, function iteratee(item, callback) {
+            rssuser[item.id].userRank = item.newrank;
+            rssuser[item.id].save().then(function(item) {
+               callback(null,item);
+            });
+            //callback(null, rssuser[item]); // if many items are cached, you'll overflow
+         }, function done() {
+            res.end();
+      });
 
 
-      res.end();
-
-      //rssuser.userRank = req.body.newRank;
-      // rssuser.save().then( function(e) {
-      //
-      //    res.end();
-      // }).catch( function(err) {
-      //    console.log("DB Save() error ",err);
-      //    res.end();
-      // })
    }).catch( function(err) {
       var alerts = {"error": "DB error "+err};
       console.log("DB error ",alerts.error);
