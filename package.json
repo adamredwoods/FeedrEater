@@ -26,6 +26,7 @@
     "moustache": "0.0.2",
     "mustache": "^2.3.0",
     "mustache-express": "^1.2.5",
+    "nodemon": "^1.14.11",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "passport-twitter": "^1.0.4",
