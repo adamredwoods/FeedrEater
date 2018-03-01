@@ -62,6 +62,7 @@ router.get("/", isLoggedIn, function(req,res) {
 
 //-- maintain our memory cache of rss data here
 router.get("/feeddata", isLoggedIn, function(req,res) {
+
    let obj = {
       "total": req.session.rssTotal,
       data: {}
@@ -70,14 +71,13 @@ router.get("/feeddata", isLoggedIn, function(req,res) {
    if (req.session.rssdata.length>0 && req.session.rssTotal>0) {
       obj.data = req.session.rssdata.pop();
       //-- decrease total
-      console.log(req.session.rssTotal);
-      //req.session.rssTotal--;
+      req.session.rssTotal = req.session.rssdata.length;
    } else if (req.session.rssTotal===0){
       req.session.rssTotal=0;
       req.session.rssdata=[];
       obj.data={};
    }
-   res.send(obj);
+   res.json(obj);
 
 })
 

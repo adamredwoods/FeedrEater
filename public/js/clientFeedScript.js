@@ -6,6 +6,12 @@ var sortTypes = ["All by Date", "By URL"];
 var currentSort = 0;
 var sortSelector = document.getElementsByClassName("sort-selector")[0];
 var lastReceived = "";
+//
+//
+//--get data from server
+var feed = document.getElementsByClassName("feed")[0];
+var totalfeed=[];
+
 
 if(sortSelector) {
    sortSelector.addEventListener("click",function(event) {
@@ -20,13 +26,6 @@ function setSortText() {
    sortSelector.textContent = sortTypes[currentSort];
 }
 
-//
-//
-//--get data from server
-var feed = document.getElementsByClassName("feed")[0];
-var totalfeed=[];
-
-var interval = setInterval(getData,REQUEST_TIME);
 
 //--could appendFeed to totalfeed, then call update feed where updateFeed will sort and display
 
@@ -182,26 +181,30 @@ function appendFeed(data, cache) {
       }
    }
    update();
-   
+
 }
 
 function getData() {
-   ajax().get("/user/feeddata").then( function(res, xhr) {
-      //-- exit on server errors
 
-      if (xhr.status!==200 || !res.total) {
-         clearInterval(interval);
+   ajax().get("/user/feeddata").then(function(res, xhr) {
+      //-- exit on server errors
+console.log(xhr.status);
+      if (xhr.status>400 || !res.total) {
+         //clearInterval(interval);
          return;
       } else {
          let obj = JSON.parse(xhr.response);
+         console.log(obj)
          if (obj.total>0) {
             if(obj.data && obj.data[0] && obj.data[0].source !== lastReceived) {
                lastReceived = obj.data[0].source;
                appendFeed(obj.data, true);
+
             }
+            setTimeout(getData, REQUEST_TIME);
          } else {
             lastReceived ="";
-            clearInterval(interval);
+            //clearInterval(interval);
          }
       }
    })
@@ -209,3 +212,5 @@ function getData() {
 
 //--sort first time
 setSortText();
+
+var interval = setTimeout(getData,REQUEST_TIME);

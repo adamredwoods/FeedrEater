@@ -15,15 +15,16 @@
       {{>alert}}
       <div class="row">
          <div class="column headline-logo ">
-            <h1 class="padding-10">FeederEatr</h1>
+            <h1 class="padding-10"><a href="/">FeederEatr</a></h1>
             <div class="headline-login text-right">
                {{#login}}
                   {{^user}}
                      <a class="button" href="/user">Login</a>
+                     <a class="button" href="/auth/guest">Guest Login</a>
                   {{/user}}
                   {{#user}}
                      <a class="button" href="/user">{{user}}</a>
-                     {{/user}}
+                  {{/user}}
                {{/login}}
                {{^login}}
                {{/login}}

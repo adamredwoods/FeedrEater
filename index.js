@@ -49,4 +49,3 @@ app.get("/", function(req,res) {
 });
 
 server = app.listen(process.env.PORT || 3000);
-global.io = socket(server);

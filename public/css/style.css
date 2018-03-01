@@ -141,7 +141,7 @@ header p {
 .headline-logo h1{
    font-size: 2.0em;
    display: inline-block;
-   width: 80%;
+   width: 70%;
 }
 
 .headline-login {
@@ -162,4 +162,8 @@ header p {
   line-height: 2.8rem;
   padding: 0 1.5rem;
 
+}
+
+.home-content {
+   margin-top: 3rem;
 }

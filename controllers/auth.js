@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const passport = require("../config/passportConfig");
 const db = require('../models');
@@ -63,6 +64,34 @@ router.get("/logout", function(req,res){
    req.logout();
    req.flash("success","Logout success.");
    res.redirect("/");
+});
+
+router.get("/guest", function(req,res, next) {
+   db.user.findOne({ where: {email :process.env.GUEST_NAME}}).then(
+      function(user){
+         // if (user) {
+         //    req.user=user;
+         //    passport.authenticate("local", {
+         //       successRedirect: "/user",
+         //       successFlash: "Guest user account",
+         //       failureRedirect: "/auth/login",
+         //       failureFlash: "Guest account problem."
+         //    })(req, res, next);
+         // }
+         passport.authenticate('local', function(err, user2, info) {
+            if (err) { return next(err); }
+            if (!user) { return res.redirect('/auth/login'); }
+            req.logIn(user, function(err) {
+               if (err) { return next(err); }
+               return res.redirect("/user");
+            });
+         })(req, res, next);
+      }
+
+   ).catch(function(err){
+      req.flash("error", {message:"Guest user not implemented."});
+      res.redirect("/auth/login");
+   });
 });
 
 module.exports = router;
