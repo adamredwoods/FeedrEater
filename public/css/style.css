@@ -72,6 +72,9 @@ body {
 
 }
 
+.rsslist-block {
+   margin-bottom: 0.5rem;
+}
 .rsslist-image {
    width: 15%;
    /*float: left;*/

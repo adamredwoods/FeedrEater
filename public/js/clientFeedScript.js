@@ -5,7 +5,7 @@ const REQUEST_TIME = 100;
 var sortTypes = ["All by Date", "By URL"];
 var currentSort = 0;
 var sortSelector = document.getElementsByClassName("sort-selector")[0];
-var lastReceived = ""; //--store the source of the last feed received to prevent repeat pulls 
+var lastReceived = ""; //--store the source of the last feed received to prevent repeat pulls
 //
 //
 //--get data from server
@@ -65,43 +65,18 @@ function createSortByDateFeed() {
 
    for(let i=0; i<totalfeed.length; i++) {
 
-      var pp = document.createElement("p");
-
-      var line1 = document.createElement("div");
-      line1.setAttribute("class","rsslist-image");
-      var img = document.createElement("img");
-      img.setAttribute("src",totalfeed[i].imgurl);
-      img.setAttribute("width","120px");
-      img.setAttribute("style","display:inline; margin-right:20px");
-
+      let h2 = "";
+      let url = totalfeed[i].imgurl;
       if(totalfeed[i].imgurl.length<3) {
-         img.setAttribute("src","");
-         img = document.createElement("h2");
-         img.textContent = totalfeed[i].imgurl[0];
+         h2="<h2>"+totalfeed[i].imgurl[0]+"</h2>";
+         url="";
       }
-      line1.appendChild(img);
 
-      var titleblock = document.createElement("div");
-      titleblock.setAttribute("class","rsslist-titleblock");
-      var a = document.createElement("a");
-      a.textContent = totalfeed[i].title;
-      a.setAttribute("href",totalfeed[i].url);
-      a.setAttribute("class","rsslist-title");
-      a.setAttribute("target","_blank");
-      titleblock.appendChild(a);
-      var line2 = document.createElement("div");
-      var source = document.createElement("div");
-      source.setAttribute("class","source-tag");
-      source.textContent = totalfeed[i].source;
-      line2.appendChild(source);
-      var date = document.createElement("span");
-      date.textContent = totalfeed[i].date;
-      line2.appendChild(date);
-      pp.appendChild(line1);
-      pp.appendChild(titleblock);
-      pp.appendChild(line2);
+      let h = "<div class='rss-list-block'><div class='rsslist-image'><img src='"+url+"' width='120px' style='display:inline; margin-right:20px'>"+h2+"</div>"
+      h+= "<div class='rsslist-titleblock'><a href='"+totalfeed[i].url+"' class='rsslist-title' target='_blank'>"+totalfeed[i].title+"</a>"
+      h+= "<div><div class='source-tag'>"+totalfeed[i].source+"<span>"+totalfeed[i].date+"</span></div></div></div></div>"
+      htmlfeed.innerHTML+=h;
 
-      htmlfeed.appendChild(pp);
    }
 
    return htmlfeed;
