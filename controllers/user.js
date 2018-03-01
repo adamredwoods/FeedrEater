@@ -23,10 +23,11 @@ router.get("/", isLoggedIn, function(req,res) {
 
       req.session.rssTotal = list.rsslists.length;
       req.session.rssdata = [];
+      req.session.retries = 0;
 
       for (let i=0; i<list.rsslists.length; i++) {
-         //--this rss.get could use an LRU cache
-         process.nextTick( ()=> {
+         //--this rss.get could use an LRU cache for the feeds+timestamp
+
             if (list.rsslists[i].url) {
                rss.getRss(list.rsslists[i].url, function(err, xml) {
                   if(!err) {
@@ -45,7 +46,7 @@ router.get("/", isLoggedIn, function(req,res) {
                   }
                });
             }
-         });
+
       }
 
 
@@ -68,14 +69,19 @@ router.get("/feeddata", isLoggedIn, function(req,res) {
       data: {}
    };
 
-   if (req.session.rssdata.length>0 && req.session.rssTotal>0) {
-      obj.data = req.session.rssdata.pop();
+   if (req.session.rssdata.length>0 && req.session.rssTotal>0 && req.session.rssdata[req.session.rssTotal-1]) {
+      obj.data = req.session.rssdata[req.session.rssTotal-1];
       //-- decrease total
-      req.session.rssTotal = req.session.rssdata.length;
+      // req.session.rssTotal = req.session.rssdata.length;
+      req.session.rssTotal--;
    } else if (req.session.rssTotal===0){
-      req.session.rssTotal=0;
+      // req.session.rssTotal=0;
       req.session.rssdata=[];
       obj.data={};
+   } else if (req.session.rssTotal>0) {
+      //-- catch for bad connections
+      req.session.retries++;
+      if (req.session.retries>20) req.session.rssTotal=0;
    }
    res.json(obj);
 

@@ -5,13 +5,12 @@ const REQUEST_TIME = 100;
 var sortTypes = ["All by Date", "By URL"];
 var currentSort = 0;
 var sortSelector = document.getElementsByClassName("sort-selector")[0];
-var lastReceived = "";
+var lastReceived = ""; //--store the source of the last feed received to prevent repeat pulls 
 //
 //
 //--get data from server
 var feed = document.getElementsByClassName("feed")[0];
 var totalfeed=[];
-
 
 if(sortSelector) {
    sortSelector.addEventListener("click",function(event) {
@@ -188,7 +187,7 @@ function getData() {
 
    ajax().get("/user/feeddata").then(function(res, xhr) {
       //-- exit on server errors
-console.log(xhr.status);
+console.log("total",res.total);
       if (xhr.status>400 || !res.total) {
          //clearInterval(interval);
          return;
